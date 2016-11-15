@@ -130,7 +130,7 @@ def sumdf(column_name, dataframes: list):
                 bb = pd.DataFrame([4,5,6])
                 sum_rcs(0,[aa,bb])
 
-                # Out: 
+                # Out:
                 0    5
                 1    7
                 2    9
@@ -182,14 +182,20 @@ def feko_contourf(df, title='', xti=30, yti=1, alpha=.75,
                   fn="Times New Roman", fnsize=12,
                   *args, **kwargs):
     """
-    contourf(等高線)を描く
+    pivotされたデータフレームを引数にcontourfを描く
 
-    引数:
-        df: pivotされたデータフレーム
-            x, y, zを内部で計算
-        title: グラフのタイトル
-        fn: フォント
-        xti, yti: tickの区切り(<n>degごとに分割する)
+    * 引数:
+        * df: pivotされたデータフレーム
+            * x, y, zはdfから計算される
+        * title: グラフのタイトル
+        * xti, yti: tickの区切り(<n>degごとに分割する)
+        * alpha: ヒートマップの透過率
+        * xlabel, ylabel, zlabel: ラベル名
+        * cmap: カラーマップ
+        * cmaphigh, cmaplow, cmaplebel: カラーマップの最大値、最小値、段階
+        * cmapstep: 右側に表示されるカラーマップの区切りをいくつごとにするか
+        * fn, fnsize: フォント、フォントサイズ
+    * 戻り値: なし
     """
     X = df.columns.values
     Y = df.index.values
