@@ -13,7 +13,7 @@ def w2db(x):
 
 def db2w(x):
     """dB -> mW"""
-    return np.power(10, x/10)
+    return np.power(10, x / 10)
 
 
 def v2db(x):
@@ -23,7 +23,7 @@ def v2db(x):
 
 def db2v(x):
     """dB -> V"""
-    return np.power(10, x/20)
+    return np.power(10, x / 20)
 
 
 def a2comp(mag, arg):
@@ -37,7 +37,7 @@ def a2comp(mag, arg):
     """
     return mag * (np.cos(np.radians(arg)) + np.sin(np.radians(arg)) * 1j)
 
-    
+
 def rcs_total(Etheta, Ephi, source_power):
     """
     引数：
@@ -66,8 +66,8 @@ def import_data(filename: str):
         if dataline:
             data = line.split()
             ar.append([float(data[0]),
-                              float(data[1]),
-                              w2db(float(data[6]))])  # RCS値をdBm表示
+                       float(data[1]),
+                       w2db(float(data[6]))])  # RCS値をdBm表示
             dataline = False
     print("Import data completed")
     df = pd.DataFrame(ar, columns=["THETA", "PHI", "RCS_dBsm"])
@@ -102,10 +102,10 @@ def import_data_comp(filename: str, ram=1):
             rcs_w = rcs_total(et_comp, ep_comp, 1)  # 分母の'1'は計算時に指定したソースパワー
             rcs = w2db(rcs_w)
             ar.append([float(data[0]) - 90,
-                             float(data[1]),
-                             et_comp,
-                             ep_comp,
-                             rcs])  # RCS値をdBm表示
+                       float(data[1]),
+                       et_comp,
+                       ep_comp,
+                       rcs])  # RCS値をdBm表示
             dataline = False
     print("Import data completed")
     df = pd.DataFrame(ar)
@@ -116,7 +116,7 @@ def import_data_comp(filename: str, ram=1):
 def sumdf(column_name, dataframes: list):
     """
     引数にしたデータフレームの特定のカラムを足し算してデータフレームとして返す。
-    
+
     引数;
         column_name:カラムの名前
         dataframes: データフレームを入れたリスト
@@ -124,12 +124,12 @@ def sumdf(column_name, dataframes: list):
         df.sum(): データフレームの一部だけ取り出したものを
                     ひとつのデータフレームにして
                     各列を足し算したもの
-                    
+
     example)
                 aa = pd.DataFrame([1,2,3])
                 bb = pd.DataFrame([4,5,6])
                 sum_rcs(0,[aa,bb])
-                
+
                 # Out: 
                 0    5
                 1    7
@@ -139,8 +139,75 @@ def sumdf(column_name, dataframes: list):
     return df.sum()
 
 
+def fine_ticks(tick, deg):
+    """
+    グラフのticksをいい感じにする
+
+    tick: labelに使うリスト(リスト型)
+    deg: labelをdegごとに分割する
+
+    TEST
+    ```
+    #In : for i in range(10,180,10):
+              print(fine_ticks(np.arange(181),i))
+    #Out :
+        [   0.   10.   20.   30.   40.   50.   60.   70.   80.   90.  100.  110.
+          120.  130.  140.  150.  160.  170.  180.]
+        [   0.   20.   40.   60.   80.  100.  120.  140.  160.  180.]
+        [   0.   30.   60.   90.  120.  150.  180.]
+        [   0.   45.   90.  135.  180.]
+        [   0.   60.  120.  180.]
+        [   0.   60.  120.  180.]
+        [   0.   90.  180.]
+        [   0.   90.  180.]
+        [   0.   90.  180.]
+        [   0.  180.]
+        [   0.  180.]
+        [   0.  180.]
+        [   0.  180.]
+        [   0.  180.]
+        [   0.  180.]
+        [   0.  180.]
+        [   0.  180.]
+    ```
+    """
+    return np.linspace(tick.min(),
+                       tick.max(),
+                       (tick.max() - tick.min()) / deg + 1)
 
 
-from time import clock
-from itertools import chain
-#if __name__ == '__main__':
+def feko_contourf(df, title='', xti=30, yti=1, alpha=.75,
+                  xlabel='azimuth(deg)', ylabel='elevation(deg)', zlabel='(dBsm)',
+                  cmap='jet', cmaphigh=20, cmaplow=0, cmaplevel=100, cmapstep=2,
+                  fn="Times New Roman", fnsize=12,
+                  *args, **kwargs):
+    """
+    contourf(等高線)を描く
+
+    引数:
+        df: pivotされたデータフレーム
+            x, y, zを内部で計算
+        title: グラフのタイトル
+        fn: フォント
+        xti, yti: tickの区切り(<n>degごとに分割する)
+    """
+    X = df.columns.values
+    Y = df.index.values
+    Z = df.values
+    x, y = np.meshgrid(X, Y)
+    interval = np.linspace(cmaplow, cmaphigh, cmaplevel)  # cmapの段階
+    plt.contourf(x, y, Z, interval, alpha=alpha, cmap=cmap)
+    plt.axis([x.min(), x.max(), y.min(), y.max()])
+    plt.xticks(fine_ticks(x, xti))  # 30degごと
+    plt.yticks(fine_ticks(y, yti))  # 1degごと
+    ax = plt.colorbar(ticks=fine_ticks(interval, cmapstep))  # カラーバー2区切りで表示
+    ax.set_label(zlabel, fontname=fn)
+    plt.title(title, fontsize=fnsize, fontname=fn)
+    plt.xlabel(xlabel, fontsize=fnsize, fontname=fn)
+    plt.ylabel(ylabel, fontsize=fnsize, fontname=fn)
+
+
+# TEST
+# from time import clock
+# from itertools import chain
+# if __name__ == '__main__':
