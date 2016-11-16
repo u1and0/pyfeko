@@ -215,11 +215,22 @@ def plot_contourf(df, title='', xti=30, yti=1, alpha=.75,
 
 def rolling_around(df, column_name, window, mirror=False,
                    min_periods=None, freq=None, center=False,
-                   win_type=None, on=None, axis=0):
+                   win_type=None, on=None, axis=0, *args, **kwargs):
     """
-    [全周データの作成]
-
+    **全周移動平均の作成**
     後ろのデータを逆順にしてコピーする(ミラーリングする)。
+    mirrorオプションでミラーリングしたデータを削除する。
+    `pd.DataFrame.rolling`のオプションはすべて使える。
+    詳細は`pd.DataFrame.rolling?`
+
+    # TEST
+    ```python
+    df = pd.DataFrame(np.arange(100).reshape(10, 10),
+                      columns=list('abcdefghij'))
+    print('original\n', df)
+    print('rolling mean\n', rolling_around(df, 'a', 2))
+    print('rolling mean (mirror)\n', rolling_around(df, 'a', 2, True))
+    ```
     """
     df_arround = df[(df[column_name] > 0)].copy()
     df_arround[column_name] *= -1  # 負の値
@@ -229,20 +240,15 @@ def rolling_around(df, column_name, window, mirror=False,
     f = df_roll.rolling(window, min_periods=None,
                         freq=None, center=False,
                         win_type=None, on=None, axis=0)
-    df_rmean = f.mean()
-    dff = df_rmean[df_rmean.ix[:, column_name] >= 0]\
-        .reset_index(drop=True) if not mirror else df_rmean
-    return dff
+    df_rmean = f.mean()  # 移動平均
+
+    if not mirror:  # mirror=Falseなら、ミラーリングを削除する。
+        df_rmean = df_rmean[df_rmean.ix[:, column_name] >= 0].reset_index(drop=True)
+    return df_rmean
 
 
 # TEST
 # from time import clock
 # from itertools import chain
-if __name__ == '__main__':
-    df = pd.DataFrame(np.arange(100).reshape(10, 10),
-                      columns=list('abcdefghij'))
-    dft = rolling_around(df, 'a', 4)
-    print(df)
-    print(dft)
-    # fd = dft.rolling(3).mean()
-    # print(fd[fd.a >= 0])
+# if __name__ == '__main__':
+
