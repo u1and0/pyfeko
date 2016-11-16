@@ -277,6 +277,15 @@ def rolling_around2(df, columns, window,
     return df
 
 
+def rolling_aroundk(df, columns):
+    #全周データの作成
+    df_arround = df[(df[columns] > 0)].copy() 
+    df_arround[columns] = df_arround[columns] * -1
+    df_arround = df_arround.sort_values(by=columns)
+    df_arround = pd.concat([df_arround, df])
+    df_arround = df_arround.reset_index( drop = True )
+    return df_arround
+
 # TEST
 # from time import clock
 # from itertools import chain
@@ -289,3 +298,4 @@ if __name__ == '__main__':
     print('normal rolling mean\n', df.rolling(window).mean())
     print('around2 rolling mean\n', rolling_around2(df, columns, window))
     print('around rolling mean\n', rolling_around(df, 'a', window))
+    print('K\'s rolling mean\n', rolling_aroundk(df, 'a'))
