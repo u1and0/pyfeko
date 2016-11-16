@@ -248,9 +248,9 @@ def rolling_around(df, window, min_periods=None, freq=None, center=False,
     ```
     """
     df_roll = df.append(df, ignore_index=True)  # 同じデータをつなげる
-    f = df_roll.rolling(window, min_periods=None,
-                        freq=None, center=False,
-                        win_type=None, on=None, axis=0)
+    f = df_roll.rolling(window, min_periods=min_periods,
+                        freq=freq, center=center,
+                        win_type=win_type, on=on, axis=axis)
     df_rmean = f.mean()  # 移動平均
     return df_rmean.loc[len(df_rmean) / 2:]\
         .reset_index(drop=True)  # rollingしたもの不要な部分切捨てindexをリセット
