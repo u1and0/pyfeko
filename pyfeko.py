@@ -213,8 +213,7 @@ def plot_contourf(df, title='', xti=30, yti=1, alpha=.75,
     plt.ylabel(ylabel, fontsize=fnsize, fontname=fn)
 
 
-def rolling_around(df, columns, window,
-                   min_periods=None, freq=None, center=False,
+def rolling_around(df, window, min_periods=None, freq=None, center=False,
                    win_type=None, on=None, axis=0, *args, **kwargs):
     """
     **全周移動平均の作成**
@@ -237,32 +236,26 @@ def rolling_around(df, columns, window,
     ```python
     df = pd.DataFrame(np.arange(100).reshape(10, 10),
                       columns=list('abcdefghij'))
-    print('original\n', df)
-    print('rolling mean\n', rolling_around(df, 'a', 2))
-    print('rolling mean (mirror)\n', rolling_around(df, 'a', 2, True))
-    ```
-    """
-    dfc = df.copy()
-    dft = dfc.ix[:, columns]  # rolling mean対象のdfだけ抜き出し
-    df_roll = dft.append(dft, ignore_index=True)  # 同じデータをつなげる
-    f = df_roll.rolling(window, min_periods=None,
-                        freq=None, center=False,
-                        win_type=None, on=None, axis=0)
-    df_rmean = f.mean()  # 移動平均
-    k = df_rmean.loc[len(df_rmean) / 2:].reset_index(drop=True)  # rollingしたもの不要な部分切捨て、indexをリセット
-    dfc.ix[:, columns] = k  # 元のdfにすげ替え
-    return dfc
-
-
-# TEST
-# from time import clock
-# from itertools import chain
-if __name__ == '__main__':
-    df = pd.DataFrame(np.arange(100).reshape(10, 10),
-                      columns=list('abcdefghij'))
     window = 2
     a = df.copy()
     normal_rolling_mean = a.rolling(window).mean()
     print('original\n', df)
     print('normal rolling mean\n', normal_rolling_mean)
-    print('around rolling mean\n', rolling_around(df, ['a', 'c'], window))
+    rol = rolling_around(df.ix[:, ['a', 'c']], window)  # 移動平均するカラムを選択
+    df.ix[:, ['a', 'c']] = rol  # 移動平均したものを挿げ替え
+    print('around rolling mean\n', df)
+    ```
+    """
+    df_roll = df.append(df, ignore_index=True)  # 同じデータをつなげる
+    f = df_roll.rolling(window, min_periods=None,
+                        freq=None, center=False,
+                        win_type=None, on=None, axis=0)
+    df_rmean = f.mean()  # 移動平均
+    return df_rmean.loc[len(df_rmean) / 2:]\
+        .reset_index(drop=True)  # rollingしたもの不要な部分切捨てindexをリセット
+
+
+# TEST
+# from time import clock
+# from itertools import chain
+# if __name__ == '__main__':
