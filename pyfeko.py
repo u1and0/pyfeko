@@ -1,5 +1,5 @@
 """
-FEKOの計算結果を
+FEKOの計算結果を可視化、サポートするツール群
 """
 import numpy as np
 import pandas as pd
@@ -32,8 +32,7 @@ def a2comp(mag, arg):
     引数:
         mag: magnitude
         arg: argument
-    戻り値:
-             mag * (np.cos(np.radians(arg)) + np.sin(np.radians(arg)) * 1j): 複素数表示
+    戻り値: 複素数表示
     """
     return mag * (np.cos(np.radians(arg)) + np.sin(np.radians(arg)) * 1j)
 
@@ -79,11 +78,11 @@ def import_data_comp(filename: str, ram=1):
     """
     FEKOの.outファイルをpandas DataFrame形式にして返す
 
-    引数:
-        filename: ファイル名(str型)
-        ram: 電波吸収体反射係数真数。指定しなければ1(=変倍しない)(float型)
-    戻り値:
-        df: 列名が'THETA', 'PHI', 'ET_COMP', 'EP_COMP', 'RCS_dBsm'(pandas.DataFrame型)
+    * 引数:
+        * filename: ファイル名(str型)
+        * ram: 電波吸収体反射係数真数。指定しなければ1(=変倍しない)(float型)
+    * 戻り値:
+        df: 列名が'THETA', 'PHI', 'ET_COMP', 'EP_COMP', 'RCS_dBsm'(* pandas.DataFrame型)
     """
     ar = []
     dataline = False
@@ -143,11 +142,13 @@ def fine_ticks(tick, deg):
     """
     グラフのticksをいい感じにする
 
-    tick: labelに使うリスト(リスト型)
-    deg: labelをdegごとに分割する
+    * 引数:
+        * tick: labelに使うリスト(リスト型)
+        * deg: labelをdegごとに分割する
+    * 戻り値: tickの最大、最小値、degから求めたイイ感じのnp.array
 
-    TEST
     ```
+    # TEST
     #In : for i in range(10,180,10):
               print(fine_ticks(np.arange(181),i))
     #Out :
@@ -230,7 +231,7 @@ def rolling_around(df, window, min_periods=None, freq=None, center=False,
         window: 平均を行うの区間(int型など)
         以下はpandasのドキュメント参照
         [min_periods, freq, center, win_type, on, axis]
-    戻り値: df: 元のデータフレームに移動平均処理を行ったカラムを挿げ替えたデータフレーム(pandas.DataFrame型)
+    戻り値: 全周移動平均処理を行ったデータフレーム(pandas.DataFrame型)
 
     # TEST
     ```python
