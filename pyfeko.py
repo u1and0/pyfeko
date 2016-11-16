@@ -266,25 +266,27 @@ def rolling_around2(df, columns, window,
     print('rolling mean (mirror)\n', rolling_around(df, 'a', 2, True))
     ```
     """
-    dft = df.ix[:, columns]  # rolling mean対象のdfだけ抜き出し
+    dfc = df.copy()
+    dft = dfc.ix[:, columns]  # rolling mean対象のdfだけ抜き出し
     df_roll = dft.append(dft, ignore_index=True)  # 同じデータをつなげる
     f = df_roll.rolling(window, min_periods=None,
                         freq=None, center=False,
                         win_type=None, on=None, axis=0)
     df_rmean = f.mean()  # 移動平均
-    k = df_rmean.loc[len(df_rmean)/2:].reset_index(drop=True)  # rollingしたもの不要な部分切捨て、indexをリセット
-    df.ix[:, columns] = k  # 元のdfにすげ替え
-    return df
+    k = df_rmean.loc[len(df_rmean) / 2:].reset_index(drop=True)  # rollingしたもの不要な部分切捨て、indexをリセット
+    dfc.ix[:, columns] = k  # 元のdfにすげ替え
+    return dfc
 
 
-def rolling_aroundk(df, columns):
-    #全周データの作成
-    df_arround = df[(df[columns] > 0)].copy() 
+def rolling_aroundk(df, columns, window):
+    # 全周データの作成
+    df_arround = df[(df[columns] > 0)].copy()
     df_arround[columns] = df_arround[columns] * -1
     df_arround = df_arround.sort_values(by=columns)
     df_arround = pd.concat([df_arround, df])
-    df_arround = df_arround.reset_index( drop = True )
-    return df_arround
+    df_arround = df_arround.reset_index(drop=True)
+    ddd = df_arround.rolling(window).mean().loc[len(df_arround)/2:].reset_index(drop=True)
+    return ddd
 
 # TEST
 # from time import clock
@@ -294,8 +296,10 @@ if __name__ == '__main__':
                       columns=list('abcdefghij'))
     window = 2
     columns = ['a', 'c']
+    a=df.copy()
+    normal_rolling_mean = a.rolling(window).mean()
     print('original\n', df)
-    print('normal rolling mean\n', df.rolling(window).mean())
+    print('normal rolling mean\n', normal_rolling_mean)
     print('around2 rolling mean\n', rolling_around2(df, columns, window))
     print('around rolling mean\n', rolling_around(df, 'a', window))
-    print('K\'s rolling mean\n', rolling_aroundk(df, 'a'))
+    print('K\'s rolling mean\n', rolling_aroundk(df, 'a', window))
