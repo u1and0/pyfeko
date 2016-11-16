@@ -213,49 +213,25 @@ def plot_contourf(df, title='', xti=30, yti=1, alpha=.75,
     plt.ylabel(ylabel, fontsize=fnsize, fontname=fn)
 
 
-def rolling_around(df, column_name, window, mirror=False,
+def rolling_around(df, columns, window,
                    min_periods=None, freq=None, center=False,
                    win_type=None, on=None, axis=0, *args, **kwargs):
     """
     **全周移動平均の作成**
-    後ろのデータを逆順にしてコピーする(ミラーリングする)。
-    mirrorオプションでミラーリングしたデータを削除する。
-    `pd.DataFrame.rolling`のオプションはすべて使える。
-    詳細は`pd.DataFrame.rolling?`
+    * 元データを2つ重ねて移動平均をとる。
+    * 移動平均処理後は重ねた分のデータは不必要なので、
+      消してインデックスをリセットする。
+    > `df.loc[len(df/2):].reset_index()`
+    * `pd.DataFrame.rolling`のオプションはすべて使える。
+    > 詳細は`pd.DataFrame.rolling?`
 
-    # TEST
-    ```python
-    df = pd.DataFrame(np.arange(100).reshape(10, 10),
-                      columns=list('abcdefghij'))
-    print('original\n', df)
-    print('rolling mean\n', rolling_around(df, 'a', 2))
-    print('rolling mean (mirror)\n', rolling_around(df, 'a', 2, True))
-    ```
-    """
-    df_arround = df[(df[column_name] > 0)].copy()
-    df_arround[column_name] *= -1  # 負の値
-    df_arround = df_arround.sort_values(by=column_name)  # ソートで反転
-    df_roll = df_arround.reset_index(drop=True)\
-        .append(df, ignore_index=True)  # dfを追加してインデックスをリセット
-    f = df_roll.rolling(window, min_periods=None,
-                        freq=None, center=False,
-                        win_type=None, on=None, axis=0)
-    df_rmean = f.mean()  # 移動平均
-
-    if not mirror:  # mirror=Falseなら、ミラーリングを削除する。
-        df_rmean = df_rmean[df_rmean.ix[:, column_name] >= 0].reset_index(drop=True)
-    return df_rmean
-
-
-def rolling_around2(df, columns, window,
-                    min_periods=None, freq=None, center=False,
-                    win_type=None, on=None, axis=0, *args, **kwargs):
-    """
-    **全周移動平均の作成**
-    後ろのデータを逆順にしてコピーする(ミラーリングする)。
-    mirrorオプションでミラーリングしたデータを削除する。
-    `pd.DataFrame.rolling`のオプションはすべて使える。
-    詳細は`pd.DataFrame.rolling?`
+    引数:
+        df:データフレーム
+        columns:平均処理をするカラム(リスト形式など)
+        window: 平均を行うの区間(int型など)
+        以下はpandasのドキュメント参照
+        [min_periods, freq, center, win_type, on, axis]
+    戻り値: df: 元のデータフレームに移動平均処理を行ったカラムを挿げ替えたデータフレーム(pandas.DataFrame型)
 
     # TEST
     ```python
@@ -278,16 +254,6 @@ def rolling_around2(df, columns, window,
     return dfc
 
 
-def rolling_aroundk(df, columns, window):
-    # 全周データの作成
-    df_arround = df[(df[columns] > 0)].copy()
-    df_arround[columns] = df_arround[columns] * -1
-    df_arround = df_arround.sort_values(by=columns)
-    df_arround = pd.concat([df_arround, df])
-    df_arround = df_arround.reset_index(drop=True)
-    ddd = df_arround.rolling(window).mean().loc[len(df_arround)/2:].reset_index(drop=True)
-    return ddd
-
 # TEST
 # from time import clock
 # from itertools import chain
@@ -295,11 +261,8 @@ if __name__ == '__main__':
     df = pd.DataFrame(np.arange(100).reshape(10, 10),
                       columns=list('abcdefghij'))
     window = 2
-    columns = ['a', 'c']
-    a=df.copy()
+    a = df.copy()
     normal_rolling_mean = a.rolling(window).mean()
     print('original\n', df)
     print('normal rolling mean\n', normal_rolling_mean)
-    print('around2 rolling mean\n', rolling_around2(df, columns, window))
-    print('around rolling mean\n', rolling_around(df, 'a', window))
-    print('K\'s rolling mean\n', rolling_aroundk(df, 'a', window))
+    print('around rolling mean\n', rolling_around(df, ['a', 'c'], window))
