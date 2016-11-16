@@ -117,13 +117,13 @@ def sumdf(column_name, dataframes: list):
     """
     引数にしたデータフレームの特定のカラムを足し算してデータフレームとして返す。
 
-    引数;
-        column_name:カラムの名前
-        dataframes: データフレームを入れたリスト
-    戻り値:
-        df.sum(): データフレームの一部だけ取り出したものを
-                    ひとつのデータフレームにして
-                    各列を足し算したもの
+    * 引数;
+        * column_name:カラムの名前
+        * dataframes: データフレームを入れたリスト
+    * 戻り値:
+        * df.sum(): データフレームの一部だけ取り出したものを
+                    ひとつのデータフレームにして、
+                    各列を足し算したpandas.Series
 
     example)
                 aa = pd.DataFrame([1,2,3])
@@ -131,9 +131,9 @@ def sumdf(column_name, dataframes: list):
                 sum_rcs(0,[aa,bb])
 
                 # Out:
-                0    5
-                1    7
-                2    9
+                0    5  # 1+4
+                1    7  # 2+5
+                2    9  # 3+6
     """
     df = pd.DataFrame([i[column_name] for i in dataframes])
     return df.sum()
@@ -176,7 +176,7 @@ def fine_ticks(tick, deg):
                        (tick.max() - tick.min()) / deg + 1)
 
 
-def feko_contourf(df, title='', xti=30, yti=1, alpha=.75,
+def plot_contourf(df, title='', xti=30, yti=1, alpha=.75,
                   xlabel='azimuth(deg)', ylabel='elevation(deg)', zlabel='(dBsm)',
                   cmap='jet', cmaphigh=20, cmaplow=0, cmaplevel=100, cmapstep=2,
                   fn="Times New Roman", fnsize=12,
