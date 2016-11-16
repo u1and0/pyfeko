@@ -213,7 +213,36 @@ def plot_contourf(df, title='', xti=30, yti=1, alpha=.75,
     plt.ylabel(ylabel, fontsize=fnsize, fontname=fn)
 
 
+def rolling_around(df, column_name, window, mirror=False,
+                   min_periods=None, freq=None, center=False,
+                   win_type=None, on=None, axis=0):
+    """
+    [全周データの作成]
+
+    後ろのデータを逆順にしてコピーする(ミラーリングする)。
+    """
+    df_arround = df[(df[column_name] > 0)].copy()
+    df_arround[column_name] *= -1  # 負の値
+    df_arround = df_arround.sort_values(by=column_name)  # ソートで反転
+    df_roll = df_arround.reset_index(drop=True)\
+        .append(df, ignore_index=True)  # dfを追加してインデックスをリセット
+    f = df_roll.rolling(window, min_periods=None,
+                        freq=None, center=False,
+                        win_type=None, on=None, axis=0)
+    df_rmean = f.mean()
+    dff = df_rmean[df_rmean.ix[:, column_name] >= 0]\
+        .reset_index(drop=True) if not mirror else df_rmean
+    return dff
+
+
 # TEST
 # from time import clock
 # from itertools import chain
-# if __name__ == '__main__':
+if __name__ == '__main__':
+    df = pd.DataFrame(np.arange(100).reshape(10, 10),
+                      columns=list('abcdefghij'))
+    dft = rolling_around(df, 'a', 4)
+    print(df)
+    print(dft)
+    # fd = dft.rolling(3).mean()
+    # print(fd[fd.a >= 0])
