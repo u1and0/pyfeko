@@ -247,8 +247,45 @@ def rolling_around(df, column_name, window, mirror=False,
     return df_rmean
 
 
+def rolling_around2(df, columns, window,
+                    min_periods=None, freq=None, center=False,
+                    win_type=None, on=None, axis=0, *args, **kwargs):
+    """
+    **全周移動平均の作成**
+    後ろのデータを逆順にしてコピーする(ミラーリングする)。
+    mirrorオプションでミラーリングしたデータを削除する。
+    `pd.DataFrame.rolling`のオプションはすべて使える。
+    詳細は`pd.DataFrame.rolling?`
+
+    # TEST
+    ```python
+    df = pd.DataFrame(np.arange(100).reshape(10, 10),
+                      columns=list('abcdefghij'))
+    print('original\n', df)
+    print('rolling mean\n', rolling_around(df, 'a', 2))
+    print('rolling mean (mirror)\n', rolling_around(df, 'a', 2, True))
+    ```
+    """
+    dft = df.ix[:, columns]  # rolling mean対象のdfだけ抜き出し
+    df_roll = dft.append(dft, ignore_index=True)  # 同じデータをつなげる
+    f = df_roll.rolling(window, min_periods=None,
+                        freq=None, center=False,
+                        win_type=None, on=None, axis=0)
+    df_rmean = f.mean()  # 移動平均
+    k = df_rmean.loc[len(df_rmean)/2:].reset_index(drop=True)  # rollingしたもの不要な部分切捨て、indexをリセット
+    df.ix[:, columns] = k  # 元のdfにすげ替え
+    return df
+
+
 # TEST
 # from time import clock
 # from itertools import chain
-# if __name__ == '__main__':
-
+if __name__ == '__main__':
+    df = pd.DataFrame(np.arange(100).reshape(10, 10),
+                      columns=list('abcdefghij'))
+    window = 2
+    columns = ['a', 'c']
+    print('original\n', df)
+    print('normal rolling mean\n', df.rolling(window).mean())
+    print('around2 rolling mean\n', rolling_around2(df, columns, window))
+    print('around rolling mean\n', rolling_around(df, 'a', window))
