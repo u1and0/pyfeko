@@ -1,5 +1,5 @@
 """
-FEKOの計算結果を
+FEKOの計算結果を可視化、サポートするツール群
 """
 import numpy as np
 import pandas as pd
@@ -32,8 +32,7 @@ def a2comp(mag, arg):
     引数:
         mag: magnitude
         arg: argument
-    戻り値:
-             mag * (np.cos(np.radians(arg)) + np.sin(np.radians(arg)) * 1j): 複素数表示
+    戻り値: 複素数表示
     """
     return mag * (np.cos(np.radians(arg)) + np.sin(np.radians(arg)) * 1j)
 
@@ -79,11 +78,11 @@ def import_data_comp(filename: str, ram=1):
     """
     FEKOの.outファイルをpandas DataFrame形式にして返す
 
-    引数:
-        filename: ファイル名(str型)
-        ram: 電波吸収体反射係数真数。指定しなければ1(=変倍しない)(float型)
-    戻り値:
-        df: 列名が'THETA', 'PHI', 'ET_COMP', 'EP_COMP', 'RCS_dBsm'(pandas.DataFrame型)
+    * 引数:
+        * filename: ファイル名(str型)
+        * ram: 電波吸収体反射係数真数。指定しなければ1(=変倍しない)(float型)
+    * 戻り値:
+        df: 列名が'THETA', 'PHI', 'ET_COMP', 'EP_COMP', 'RCS_dBsm'(* pandas.DataFrame型)
     """
     ar = []
     dataline = False
@@ -143,11 +142,13 @@ def fine_ticks(tick, deg):
     """
     グラフのticksをいい感じにする
 
-    tick: labelに使うリスト(リスト型)
-    deg: labelをdegごとに分割する
+    * 引数:
+        * tick: labelに使うリスト(リスト型)
+        * deg: labelをdegごとに分割する
+    * 戻り値: tickの最大、最小値、degから求めたイイ感じのnp.array
 
-    TEST
     ```
+    # TEST
     #In : for i in range(10,180,10):
               print(fine_ticks(np.arange(181),i))
     #Out :
@@ -211,6 +212,48 @@ def plot_contourf(df, title='', xti=30, yti=1, alpha=.75,
     plt.title(title, fontsize=fnsize, fontname=fn)
     plt.xlabel(xlabel, fontsize=fnsize, fontname=fn)
     plt.ylabel(ylabel, fontsize=fnsize, fontname=fn)
+
+
+def rolling_around(df, window, min_periods=None, freq=None, center=False,
+                   win_type=None, on=None, axis=0, *args, **kwargs):
+    """
+    **全周移動平均の作成**
+    * 元データを2つ重ねて移動平均をとる。
+    * 移動平均処理後は重ねた分のデータは不必要なので、
+      消してインデックスをリセットする。
+    > `df.loc[len(df/2):].reset_index()`
+    * `pd.DataFrame.rolling`のオプションはすべて使える。
+    > 詳細は`pd.DataFrame.rolling?`
+
+    引数:
+        df:データフレーム
+        columns:平均処理をするカラム(リスト形式など)
+        window: 平均を行うの区間(int型など)
+        以下はpandasのドキュメント参照
+        [min_periods, freq, center, win_type, on, axis]
+    戻り値: 全周移動平均処理を行ったデータフレーム(pandas.DataFrame型)
+
+    # TEST
+    ```python
+    df = pd.DataFrame(np.arange(100).reshape(10, 10),
+                      columns=list('abcdefghij'))
+    window = 2
+    a = df.copy()
+    normal_rolling_mean = a.rolling(window).mean()
+    print('original\n', df)
+    print('normal rolling mean\n', normal_rolling_mean)
+    rol = rolling_around(df.ix[:, ['a', 'c']], window)  # 移動平均するカラムを選択
+    df.ix[:, ['a', 'c']] = rol  # 移動平均したものを挿げ替え
+    print('around rolling mean\n', df)
+    ```
+    """
+    df_roll = df.append(df, ignore_index=True)  # 同じデータをつなげる
+    f = df_roll.rolling(window, min_periods=None,
+                        freq=None, center=False,
+                        win_type=None, on=None, axis=0)
+    df_rmean = f.mean()  # 移動平均
+    return df_rmean.loc[len(df_rmean) / 2:]\
+        .reset_index(drop=True)  # rollingしたもの不要な部分切捨てindexをリセット
 
 
 # TEST
