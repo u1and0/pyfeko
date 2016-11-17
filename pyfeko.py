@@ -245,11 +245,12 @@ def rolling_around(df, window, mirror=False, min_periods=None, freq=None, center
     print('original\n', df)
     print('normal rolling mean\n', normal_rolling_mean)
     print('around rolling mean mirror \n', df.rolling_around(2, mirror=True))
-    print('around rolling mean NOT mirror\n', df.rolling_around(2, mirror=False))  # mirrorはデフォルトでFalseなので省略化
+    print('around rolling mean NOT mirror\n',
+        df.rolling_around(2, mirror=False))  # mirror=False省略化
     ```
     """
-    df_append=df.sort_index(ascending=False) if mirror else df  # mirror=Trueであれば"降順並べ替え"
-    df_roll = df_append.append(df , ignore_index=True)  # データをつなげる
+    df_append = df.sort_index(ascending=False) if mirror else df  # mirror=Trueであれば"降順並べ替え"
+    df_roll = df_append.append(df, ignore_index=True)  # データをつなげる
     # mirror=Trueなら鏡像データ
     # mirror=Falseなら同じデータがつながる
     f = df_roll.rolling(window, min_periods=min_periods,
@@ -257,9 +258,10 @@ def rolling_around(df, window, mirror=False, min_periods=None, freq=None, center
                         win_type=win_type, on=on, axis=axis)
     df_rmean = f.mean()  # 移動平均
     df_rtn = df_rmean.loc[len(df_rmean) / 2:]\
-            .reset_index(drop=True)  # rollingしたもの不要な部分切捨てindexをリセット
+        .reset_index(drop=True)  # rollingしたもの不要な部分切捨てindexをリセット
 
     return df_rtn
+
 
 # -----------------------------------------
 # "rolling_around"メソッドをpd.DataFrameに追加
