@@ -253,11 +253,13 @@ def rolling_around(df, window, mirror=False, min_periods=None, freq=None, center
                             freq=freq, center=center,
                             win_type=win_type, on=on, axis=axis)
         df_rmean = f.mean()  # 移動平均
+        df_rtn = df_rmean.loc[len(df_rmean) / 2:]\
+        .reset_index(drop=True)  # rollingしたもの不要な部分切捨てindexをリセット
     else:
         df_roll = df.copy()
-        print(df_roll.sort_index(ascending=False))
-    return df_rmean.loc[len(df_rmean) / 2:]\
-        .reset_index(drop=True)  # rollingしたもの不要な部分切捨てindexをリセット
+        df_append=df_roll.sort_index(ascending=False).reset_index(drop=True)  # 降順並べ替え
+        df_rtn=df_append.append(df_roll)
+    return df_rtn
 
 
 # -----------------------------------------
@@ -279,5 +281,4 @@ if __name__ == '__main__':
     normal_rolling_mean = a.rolling(window).mean()
     print('original\n', df)
     print('normal rolling mean\n', normal_rolling_mean)
-    # df.ix[:, ['a', 'c']] = rol  # 移動平均したものを挿げ替え
-    # print('around rolling mean\n', df)
+    print('around rolling mean\n', df.rolling_around(2, mirror=True))
