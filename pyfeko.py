@@ -12,7 +12,14 @@ def w2db(x):
 
 
 def db2w(x):
-    """dB -> mW"""
+    """
+    dB -> mW
+    `df.db2w()` or `db2w(df)`
+
+    TEST
+    df = pd.DataFrame(np.arange(3 * 10).reshape(-1, 3), columns=list('abc'))
+    print(df.db2w())
+    """
     return np.power(10, x / 10)
 
 
@@ -270,20 +277,13 @@ def rolling_around(df, window, mirror=False, min_periods=None, freq=None, center
 
 
 # -----------------------------------------
-# "rolling_around"メソッドをpd.DataFrameに追加
+# メソッドをpd.DataFrame, pd.Seriesに追加
 # -----------------------------------------
-pd.DataFrame.rolling_around = rolling_around
-pd.Series.rolling_around = rolling_around   # print(df.rolling_around(2))  # 使い方: 区間2の移動平均線
-pd.Series.w2db = w2db
-pd.DataFrame.w2db = w2db
-pd.Series.db2w = db2w
-pd.DataFrame.db2w = db2w
-pd.Series.v2db = v2db
-pd.DataFrame.v2db = v2db
-pd.Series.db2v = db2v
-pd.DataFrame.db2v = db2v
+cs = ('pd.DataFrame', 'pd.Series')
+flist = ('rolling_around', 'w2db', 'db2w', 'v2db', 'db2v')
+for c in cs:
+    for f in flist:
+        exec('%s.%s=%s' % (c, f, f))
+# 使い方: 区間2の移動平均線 : print(df.rolling_around(2))
 
-if __name__ == '__main__':
-    df=pd.DataFrame(np.arange(3*10).reshape(-1, 3), columns=list('abc'))
-    print(df.db2w())
-
+# if __name__ == '__main__':
