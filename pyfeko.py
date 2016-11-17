@@ -256,6 +256,14 @@ def rolling_around(df, window, min_periods=None, freq=None, center=False,
         .reset_index(drop=True)  # rollingしたもの不要な部分切捨てindexをリセット
 
 
+# -----------------------------------------
+# "rolling_around"メソッドをpd.DataFrameに追加
+# -----------------------------------------
+pd.DataFrame.rolling_around = rolling_around
+pd.Series.rolling_around = rolling_around
+# print(df.rolling_around(2))  # 使い方
+
+
 # TEST
 # from time import clock
 # from itertools import chain
