@@ -256,9 +256,8 @@ def rolling_around(df, window, mirror=False, min_periods=None, freq=None, center
         df_rtn = df_rmean.loc[len(df_rmean) / 2:]\
         .reset_index(drop=True)  # rollingしたもの不要な部分切捨てindexをリセット
     else:
-        df_roll = df.copy()
-        df_append=df_roll.sort_index(ascending=False).reset_index(drop=True)  # 降順並べ替え
-        df_rtn=df_append.append(df_roll)
+        df_append = df.sort_index(ascending=False).reset_index(drop=True)  # 降順並べ替え
+        df_rtn = df_append.append(df, ignore_index=True)  # ミラーデータ作成
     return df_rtn
 
 
