@@ -217,7 +217,7 @@ def plot_contourf(df, title='', xti=30, yti=1, alpha=.75,
 def rolling_around(df, window, mirror=False, min_periods=None, freq=None, center=False,
                    win_type=None, on=None, axis=0, *args, **kwargs):
     """
-    **全周移動平均の作成**
+    * **全周移動平均の作成**
     * 元データを2つ重ねて移動平均をとる。
     * 移動平均処理後は重ねた分のデータは不必要なので、
       消してインデックスをリセットする。
@@ -229,6 +229,7 @@ def rolling_around(df, window, mirror=False, min_periods=None, freq=None, center
         df:データフレーム
         columns:平均処理をするカラム(リスト形式など)
         window: 平均を行うの区間(int型など)
+        mirror: Trueで鏡像データの作成を行ってから平均化処理
         以下はpandasのドキュメント参照
         [min_periods, freq, center, win_type, on, axis]
     戻り値: 全周移動平均処理を行ったデータフレーム(pandas.DataFrame型)
@@ -247,20 +248,18 @@ def rolling_around(df, window, mirror=False, min_periods=None, freq=None, center
     print('around rolling mean\n', df)
     ```
     """
-        # df_roll = .reset_index(drop=True)  # 降順並べ替え
-    df_append=df.sort_index(ascending=False) if mirror else df
-    df_roll = df_append.append(df , ignore_index=True)  # 同じデータをつなげる
+    df_append=df.sort_index(ascending=False) if mirror else df  # mirror=Trueであれば"降順並べ替え"
+    df_roll = df_append.append(df , ignore_index=True)  # データをつなげる
+    # mirror=Trueなら鏡像データ
+    # mirror=Falseなら同じデータがつながる
     f = df_roll.rolling(window, min_periods=min_periods,
                         freq=freq, center=center,
                         win_type=win_type, on=on, axis=axis)
     df_rmean = f.mean()  # 移動平均
     df_rtn = df_rmean.loc[len(df_rmean) / 2:]\
-    .reset_index(drop=True)  # rollingしたもの不要な部分切捨てindexをリセット
+            .reset_index(drop=True)  # rollingしたもの不要な部分切捨てindexをリセット
 
-
-    # df_rtn = df_append.append(df, ignore_index=True)  # ミラーデータ作成
-    return df_roll
-
+    return df_rtn
 
 # -----------------------------------------
 # "rolling_around"メソッドをpd.DataFrameに追加
@@ -282,4 +281,4 @@ if __name__ == '__main__':
     print('original\n', df)
     print('normal rolling mean\n', normal_rolling_mean)
     print('around rolling mean mirror \n', df.rolling_around(2, mirror=True))
-    print('around rolling mean NOT mirror\n', df.rolling_around(2, mirror=False))
+    print('around rolling mean NOT mirror\n', df.rolling_around(2, mirror=False))  # mirrorはデフォルトでFalseなので省略化
