@@ -214,7 +214,7 @@ def plot_contourf(df, title='', xti=30, yti=1, alpha=.75,
     plt.ylabel(ylabel, fontsize=fnsize, fontname=fn)
 
 
-def rolling_around(df, window, min_periods=None, freq=None, center=False,
+def rolling_around(df, window, mirror=False, min_periods=None, freq=None, center=False,
                    win_type=None, on=None, axis=0, *args, **kwargs):
     """
     **全周移動平均の作成**
@@ -247,11 +247,15 @@ def rolling_around(df, window, min_periods=None, freq=None, center=False,
     print('around rolling mean\n', df)
     ```
     """
-    df_roll = df.append(df, ignore_index=True)  # 同じデータをつなげる
-    f = df_roll.rolling(window, min_periods=min_periods,
-                        freq=freq, center=center,
-                        win_type=win_type, on=on, axis=axis)
-    df_rmean = f.mean()  # 移動平均
+    if not mirror:
+        df_roll = df.append(df, ignore_index=True)  # 同じデータをつなげる
+        f = df_roll.rolling(window, min_periods=min_periods,
+                            freq=freq, center=center,
+                            win_type=win_type, on=on, axis=axis)
+        df_rmean = f.mean()  # 移動平均
+    else:
+        df_roll = df.copy()
+        print(df_roll.sort_index(ascending=False))
     return df_rmean.loc[len(df_rmean) / 2:]\
         .reset_index(drop=True)  # rollingしたもの不要な部分切捨てindexをリセット
 
@@ -261,10 +265,19 @@ def rolling_around(df, window, min_periods=None, freq=None, center=False,
 # -----------------------------------------
 pd.DataFrame.rolling_around = rolling_around
 pd.Series.rolling_around = rolling_around
-# print(df.rolling_around(2))  # 使い方
+# print(df.rolling_around(2))  # 使い方: 区間2の移動平均線
 
 
 # TEST
 # from time import clock
 # from itertools import chain
-# if __name__ == '__main__':
+if __name__ == '__main__':
+    n=3
+    df = pd.DataFrame(np.arange(n*10).reshape(-1, n), columns=list('abc'))
+    window = 2
+    a = df.copy()
+    normal_rolling_mean = a.rolling(window).mean()
+    print('original\n', df)
+    print('normal rolling mean\n', normal_rolling_mean)
+    # df.ix[:, ['a', 'c']] = rol  # 移動平均したものを挿げ替え
+    # print('around rolling mean\n', df)
