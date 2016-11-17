@@ -16,9 +16,11 @@ def db2w(x):
     dB -> mW
     `df.db2w()` or `db2w(df)`
 
-    TEST
+    ```python
+    # TEST
     df = pd.DataFrame(np.arange(3 * 10).reshape(-1, 3), columns=list('abc'))
     print(df.db2w())
+    ```
     """
     return np.power(10, x / 10)
 
