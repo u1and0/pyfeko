@@ -273,8 +273,17 @@ def rolling_around(df, window, mirror=False, min_periods=None, freq=None, center
 # "rolling_around"メソッドをpd.DataFrameに追加
 # -----------------------------------------
 pd.DataFrame.rolling_around = rolling_around
-pd.Series.rolling_around = rolling_around
-# print(df.rolling_around(2))  # 使い方: 区間2の移動平均線
+pd.Series.rolling_around = rolling_around   # print(df.rolling_around(2))  # 使い方: 区間2の移動平均線
+pd.Series.w2db = w2db
+pd.DataFrame.w2db = w2db
+pd.Series.db2w = db2w
+pd.DataFrame.db2w = db2w
+pd.Series.v2db = v2db
+pd.DataFrame.v2db = v2db
+pd.Series.db2v = db2v
+pd.DataFrame.db2v = db2v
 
+if __name__ == '__main__':
+    df=pd.DataFrame(np.arange(3*10).reshape(-1, 3), columns=list('abc'))
+    print(df.db2w())
 
-# if __name__ == '__main__':
