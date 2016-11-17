@@ -247,18 +247,19 @@ def rolling_around(df, window, mirror=False, min_periods=None, freq=None, center
     print('around rolling mean\n', df)
     ```
     """
-    if not mirror:
-        df_roll = df.append(df, ignore_index=True)  # 同じデータをつなげる
-        f = df_roll.rolling(window, min_periods=min_periods,
-                            freq=freq, center=center,
-                            win_type=win_type, on=on, axis=axis)
-        df_rmean = f.mean()  # 移動平均
-        df_rtn = df_rmean.loc[len(df_rmean) / 2:]\
-        .reset_index(drop=True)  # rollingしたもの不要な部分切捨てindexをリセット
-    else:
-        df_append = df.sort_index(ascending=False).reset_index(drop=True)  # 降順並べ替え
-        df_rtn = df_append.append(df, ignore_index=True)  # ミラーデータ作成
-    return df_rtn
+        # df_roll = .reset_index(drop=True)  # 降順並べ替え
+    df_append=df.sort_index(ascending=False) if mirror else df
+    df_roll = df_append.append(df , ignore_index=True)  # 同じデータをつなげる
+    f = df_roll.rolling(window, min_periods=min_periods,
+                        freq=freq, center=center,
+                        win_type=win_type, on=on, axis=axis)
+    df_rmean = f.mean()  # 移動平均
+    df_rtn = df_rmean.loc[len(df_rmean) / 2:]\
+    .reset_index(drop=True)  # rollingしたもの不要な部分切捨てindexをリセット
+
+
+    # df_rtn = df_append.append(df, ignore_index=True)  # ミラーデータ作成
+    return df_roll
 
 
 # -----------------------------------------
@@ -280,4 +281,5 @@ if __name__ == '__main__':
     normal_rolling_mean = a.rolling(window).mean()
     print('original\n', df)
     print('normal rolling mean\n', normal_rolling_mean)
-    print('around rolling mean\n', df.rolling_around(2, mirror=True))
+    print('around rolling mean mirror \n', df.rolling_around(2, mirror=True))
+    print('around rolling mean NOT mirror\n', df.rolling_around(2, mirror=False))
