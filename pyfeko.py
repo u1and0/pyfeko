@@ -218,24 +218,31 @@ def rolling_around(df, window, mirror=False, min_periods=None, freq=None, center
                    win_type=None, on=None, axis=0, *args, **kwargs):
     """
     * **全周移動平均の作成**
-    * 元データを2つ重ねて移動平均をとる。
+    * mirror=False(デフォルト)のとき、元データを2つ重ねて移動平均をとる。
+    > 周回360degのときに使う
+    * mirror=Trueのとき、元データをの鏡像を重ねて移動平均をとる。
+    > 周回180degのときに使う
     * 移動平均処理後は重ねた分のデータは不必要なので、
       消してインデックスをリセットする。
     > `df.loc[len(df/2):].reset_index()`
     * `pd.DataFrame.rolling`のオプションはすべて使える。
     > 詳細は`pd.DataFrame.rolling?`
+    * 引数:
+        * df:データフレーム
+        * columns:平均処理をするカラム(リスト形式など)
+        * window: 平均を行うの区間(int型など)
+        * mirror: Trueで鏡像データの作成を行ってから平均化処理
+        * 以下はpandasのドキュメント参照
+            * min_periods
+            * freq
+            * center
+            * win_type
+            * on
+            * axis
+    * 戻り値: 全周移動平均処理を行ったデータフレーム(pandas.DataFrame型)
 
-    引数:
-        df:データフレーム
-        columns:平均処理をするカラム(リスト形式など)
-        window: 平均を行うの区間(int型など)
-        mirror: Trueで鏡像データの作成を行ってから平均化処理
-        以下はpandasのドキュメント参照
-        [min_periods, freq, center, win_type, on, axis]
-    戻り値: 全周移動平均処理を行ったデータフレーム(pandas.DataFrame型)
-
-    # TEST
     ```python
+    # TEST
     n=3
     df = pd.DataFrame(np.arange(n*10).reshape(-1, n), columns=list('abc'))
     window = 2
@@ -259,7 +266,6 @@ def rolling_around(df, window, mirror=False, min_periods=None, freq=None, center
     df_rmean = f.mean()  # 移動平均
     df_rtn = df_rmean.loc[len(df_rmean) / 2:]\
         .reset_index(drop=True)  # rollingしたもの不要な部分切捨てindexをリセット
-
     return df_rtn
 
 
