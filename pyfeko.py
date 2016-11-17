@@ -214,49 +214,67 @@ def plot_contourf(df, title='', xti=30, yti=1, alpha=.75,
     plt.ylabel(ylabel, fontsize=fnsize, fontname=fn)
 
 
-def rolling_around(df, window, min_periods=None, freq=None, center=False,
+def rolling_around(df, window, mirror=False, min_periods=None, freq=None, center=False,
                    win_type=None, on=None, axis=0, *args, **kwargs):
     """
-    **全周移動平均の作成**
-    * 元データを2つ重ねて移動平均をとる。
+    * **全周移動平均の作成**
+    * mirror=False(デフォルト)のとき、元データを2つ重ねて移動平均をとる。
+    > 周回360degのときに使う
+    * mirror=Trueのとき、元データをの鏡像を重ねて移動平均をとる。
+    > 周回180degのときに使う
     * 移動平均処理後は重ねた分のデータは不必要なので、
       消してインデックスをリセットする。
     > `df.loc[len(df/2):].reset_index()`
     * `pd.DataFrame.rolling`のオプションはすべて使える。
     > 詳細は`pd.DataFrame.rolling?`
+    * 引数:
+        * df:データフレーム
+        * columns:平均処理をするカラム(リスト形式など)
+        * window: 平均を行うの区間(int型など)
+        * mirror: Trueで鏡像データの作成を行ってから平均化処理
+        * 以下はpandasのドキュメント参照
+            * min_periods
+            * freq
+            * center
+            * win_type
+            * on
+            * axis
+    * 戻り値: 全周移動平均処理を行ったデータフレーム(pandas.DataFrame型)
 
-    引数:
-        df:データフレーム
-        columns:平均処理をするカラム(リスト形式など)
-        window: 平均を行うの区間(int型など)
-        以下はpandasのドキュメント参照
-        [min_periods, freq, center, win_type, on, axis]
-    戻り値: 全周移動平均処理を行ったデータフレーム(pandas.DataFrame型)
-
-    # TEST
     ```python
-    df = pd.DataFrame(np.arange(100).reshape(10, 10),
-                      columns=list('abcdefghij'))
+    # TEST
+    n=3
+    df = pd.DataFrame(np.arange(n*10).reshape(-1, n), columns=list('abc'))
     window = 2
+
     a = df.copy()
     normal_rolling_mean = a.rolling(window).mean()
     print('original\n', df)
     print('normal rolling mean\n', normal_rolling_mean)
-    rol = rolling_around(df.ix[:, ['a', 'c']], window)  # 移動平均するカラムを選択
-    df.ix[:, ['a', 'c']] = rol  # 移動平均したものを挿げ替え
-    print('around rolling mean\n', df)
+    print('around rolling mean mirror \n', df.rolling_around(2, mirror=True))
+    print('around rolling mean NOT mirror\n',
+        df.rolling_around(2, mirror=False))  # mirror=False省略化
     ```
     """
-    df_roll = df.append(df, ignore_index=True)  # 同じデータをつなげる
+    df_append = df.sort_index(ascending=False) if mirror else df  # mirror=Trueであれば"降順並べ替え"
+    df_roll = df_append.append(df, ignore_index=True)  # データをつなげる
+    # mirror=Trueなら鏡像データ
+    # mirror=Falseなら同じデータがつながる
     f = df_roll.rolling(window, min_periods=min_periods,
                         freq=freq, center=center,
                         win_type=win_type, on=on, axis=axis)
     df_rmean = f.mean()  # 移動平均
-    return df_rmean.loc[len(df_rmean) / 2:]\
+    df_rtn = df_rmean.loc[len(df_rmean) / 2:]\
         .reset_index(drop=True)  # rollingしたもの不要な部分切捨てindexをリセット
+    return df_rtn
 
 
-# TEST
-# from time import clock
-# from itertools import chain
+# -----------------------------------------
+# "rolling_around"メソッドをpd.DataFrameに追加
+# -----------------------------------------
+pd.DataFrame.rolling_around = rolling_around
+pd.Series.rolling_around = rolling_around
+# print(df.rolling_around(2))  # 使い方: 区間2の移動平均線
+
+
 # if __name__ == '__main__':

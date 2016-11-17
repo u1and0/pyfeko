@@ -1,10 +1,28 @@
 FEKOの計算結果を可視化、サポートするツール群
 
-# w2db(x):　mW -> dB
-# db2w(x): dB -> mW
-# v2db(x): V -> dB
-# db2v(x): dB -> V
-# a2comp(mag, arg):
+## w2db
+`w2db(x)`
+mW -> dB
+`10 * np.log10(x)`
+
+## db2w
+`db2w(x)`
+dB -> mW
+`np.power(10, x / 10)`
+
+## v2db
+`v2db(x)`
+V -> dB
+`20 * np.log10(x)`
+
+## db2v
+`db2v(x)`
+dB -> V
+`np.power(10, x / 20)`
+
+## a2comp
+`a2comp(mag, arg)`
+`mag * (np.cos(np.radians(arg)) + np.sin(np.radians(arg)) * 1j)`
 
 * mag(大きさ)とarg(角度)を引数に、複素数表示で返す。
 * 引数:
@@ -12,14 +30,17 @@ FEKOの計算結果を可視化、サポートするツール群
     * arg: argument
 * 戻り値: 複素数表示
 
-# rcs_total(Etheta, Ephi, source_power):
+## rcs_total
+`rcs_total(Etheta, Ephi, source_power)`
+`4 * np.pi * (((np.abs(Etheta))**2 + (np.abs(Ephi))**2) / source_power)`
 
 * 引数：
     * Etheta, Ephi: 電界強度(複素数)
     * source_power: ソースの電界強度[V/m]。普通は1？outファイルやfrkoのファイル参照
 * 戻り値: 単位ソースパワーあたりのEthetaとEphiの絶対値を出して4pi掛けた値
 
-# import_data(filename: str):
+## import_data
+`import_data(filename: str)`
 
 * FEKOの.outファイルをpandas DataFrame形式にして返す
 * 引数:
@@ -27,7 +48,8 @@ FEKOの計算結果を可視化、サポートするツール群
 * 戻り値:
     * df: 列名がtheta phi, (pandas.DataFrame型)
 
-# import_data_comp(filename: str, ram=1):
+## import_data_comp
+`import_data_comp(filename: str, ram=1)`
 
 * FEKOの.outファイルをpandas DataFrame形式にして返す
 * 引数:
@@ -36,7 +58,8 @@ FEKOの計算結果を可視化、サポートするツール群
 * 戻り値:
     * df: 列名が'THETA', 'PHI', 'ET_COMP', 'EP_COMP', 'RCS_dBsm'(pandas.DataFrame型)
 
-# sumdf(column_name, dataframes: list):
+## sumdf:
+`sumdf(column_name, dataframes: list)`
 
 * 引数にしたデータフレームの特定のカラムを
 足し算してデータフレームとして返す。
@@ -59,7 +82,8 @@ FEKOの計算結果を可視化、サポートするツール群
             2    9  # 3+6
 ```
 
-# fine_ticks(tick, deg): 
+## fine_ticks
+`fine_ticks(tick, deg)`
 
 * グラフのticksをイイ感じにする
 * 引数:
@@ -91,7 +115,15 @@ FEKOの計算結果を可視化、サポートするツール群
     [   0.  180.]
 ```
 
-# plot_contourf(df, title='', xti=30, yti=1, alpha=.75, xlabel='azimuth(deg)', ylabel='elevation(deg)', zlabel='(dBsm)', cmap='jet', cmaphigh=20, cmaplow=0, cmaplevel=100, cmapstep=2, fn="Times New Roman", fnsize=12, *args, **kwargs):
+## plot_contourf
+
+```python
+plot_contourf(df, title='', xti=30, yti=1, alpha=.75,
+              xlabel='azimuth(deg)', ylabel='elevation(deg)', zlabel='(dBsm)',
+              cmap='jet', cmaphigh=20, cmaplow=0, cmaplevel=100, cmapstep=2,
+              fn="Times New Roman", fnsize=12, *args, **kwargs)
+```
+
 * pivotされたデータフレームを引数にcontourfを描く
 * 引数:
     * df: pivotされたデータフレーム
@@ -106,11 +138,20 @@ FEKOの計算結果を可視化、サポートするツール群
     * fn, fnsize: フォント、フォントサイズ
 * 戻り値: なし
 
-# rolling_around(df, window, min_periods=None, freq=None, center=False, win_type=None, on=None, axis=0, *args, **kwargs):
-* 全周移動平均の作成
-* 元データを2つ重ねて移動平均をとる。
+## rolling_around
+
+```python
+rolling_around(df, window, mirror=False, min_periods=None, freq=None, center=False, 
+               win_type=None, on=None, axis=0, *args, **kwargs)
+```
+
+* **全周移動平均の作成**
+* mirror=False(デフォルト)のとき、元データを2つ重ねて移動平均をとる。
+> 周回360degのときに使う
+* mirror=Trueのとき、元データをの鏡像を重ねて移動平均をとる。
+> 周回180degのときに使う
 * 移動平均処理後は重ねた分のデータは不必要なので、
-消してインデックスをリセットする。
+  消してインデックスをリセットする。
 > `df.loc[len(df/2):].reset_index()`
 * `pd.DataFrame.rolling`のオプションはすべて使える。
 > 詳細は`pd.DataFrame.rolling?`
@@ -118,19 +159,27 @@ FEKOの計算結果を可視化、サポートするツール群
     * df:データフレーム
     * columns:平均処理をするカラム(リスト形式など)
     * window: 平均を行うの区間(int型など)
+    * mirror: Trueで鏡像データの作成を行ってから平均化処理
     * 以下はpandasのドキュメント参照
-    * [min_periods, freq, center, win_type, on, axis]
+        * min_periods
+        * freq
+        * center
+        * win_type
+        * on
+        * axis
 * 戻り値: 全周移動平均処理を行ったデータフレーム(pandas.DataFrame型)
+
 ```python
 # TEST
-df = pd.DataFrame(np.arange(100).reshape(10, 10),
-                  columns=list('abcdefghij'))
+n=3
+df = pd.DataFrame(np.arange(n*10).reshape(-1, n), columns=list('abc'))
 window = 2
+
 a = df.copy()
 normal_rolling_mean = a.rolling(window).mean()
 print('original\n', df)
 print('normal rolling mean\n', normal_rolling_mean)
-rol = rolling_around(df.ix[:, ['a', 'c']], window)  # 移動平均するカラムを選択
-df.ix[:, ['a', 'c']] = rol  # 移動平均したものを挿げ替え
-print('around rolling mean\n', df)
+print('around rolling mean mirror \n', df.rolling_around(2, mirror=True))
+print('around rolling mean NOT mirror\n',
+    df.rolling_around(2, mirror=False))  # mirror=False省略化
 ```
