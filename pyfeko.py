@@ -236,16 +236,16 @@ def rolling_around(df, window, mirror=False, min_periods=None, freq=None, center
 
     # TEST
     ```python
-    df = pd.DataFrame(np.arange(100).reshape(10, 10),
-                      columns=list('abcdefghij'))
+    n=3
+    df = pd.DataFrame(np.arange(n*10).reshape(-1, n), columns=list('abc'))
     window = 2
+
     a = df.copy()
     normal_rolling_mean = a.rolling(window).mean()
     print('original\n', df)
     print('normal rolling mean\n', normal_rolling_mean)
-    rol = rolling_around(df.ix[:, ['a', 'c']], window)  # 移動平均するカラムを選択
-    df.ix[:, ['a', 'c']] = rol  # 移動平均したものを挿げ替え
-    print('around rolling mean\n', df)
+    print('around rolling mean mirror \n', df.rolling_around(2, mirror=True))
+    print('around rolling mean NOT mirror\n', df.rolling_around(2, mirror=False))  # mirrorはデフォルトでFalseなので省略化
     ```
     """
     df_append=df.sort_index(ascending=False) if mirror else df  # mirror=Trueであれば"降順並べ替え"
@@ -269,16 +269,4 @@ pd.Series.rolling_around = rolling_around
 # print(df.rolling_around(2))  # 使い方: 区間2の移動平均線
 
 
-# TEST
-# from time import clock
-# from itertools import chain
-if __name__ == '__main__':
-    n=3
-    df = pd.DataFrame(np.arange(n*10).reshape(-1, n), columns=list('abc'))
-    window = 2
-    a = df.copy()
-    normal_rolling_mean = a.rolling(window).mean()
-    print('original\n', df)
-    print('normal rolling mean\n', normal_rolling_mean)
-    print('around rolling mean mirror \n', df.rolling_around(2, mirror=True))
-    print('around rolling mean NOT mirror\n', df.rolling_around(2, mirror=False))  # mirrorはデフォルトでFalseなので省略化
+# if __name__ == '__main__':
