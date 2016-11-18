@@ -10,6 +10,14 @@ FEKOの計算結果を可視化、サポートするツール群
 * cmapは関数の引数から外れた
 
 
+## FEATURE NOTE
+
+* rolling_aroundのコピー機能追加
+> center=Trueのとき先端が途切れる。
+> コピーをもう一つ作成しなければ。
+
+
+
 ## w2db
 `w2db(x)`
 mW -> dB
