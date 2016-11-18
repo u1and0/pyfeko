@@ -240,7 +240,7 @@ def plot_contourf(df, title='', xti=30, yti=1, alpha=.75,
     plt.grid()
 
 
-def rolling_around(df, window, mirror=False, min_periods=None, freq=None, center=False,
+def rolling_around(self, window, mirror=False, min_periods=None, freq=None, center=False,
                    win_type=None, on=None, axis=0, *args, **kwargs):
     """
     * **全周移動平均の作成**
@@ -283,14 +283,14 @@ def rolling_around(df, window, mirror=False, min_periods=None, freq=None, center
     ```
     """
     df_append = df.sort_index(ascending=False) if mirror else df  # mirror=Trueであれば"降順並べ替え"
-    df_roll = df_append.append(df, ignore_index=True)  # データをつなげる
+    df_roll = pd.concat(df_append, df, df_append, ignore_index=True)  # データをつなげる
     # mirror=Trueなら鏡像データ
     # mirror=Falseなら同じデータがつながる
     f = df_roll.rolling(window, min_periods=min_periods,
                         freq=freq, center=center,
                         win_type=win_type, on=on, axis=axis)
     df_rmean = f.mean()  # 移動平均
-    df_rtn = df_rmean.loc[len(df_rmean) / 2:]\
+    df_rtn = df_rmean.loc[len(df_rmean) / 3:len(df_rmean) * 2 / 3]\
         .reset_index(drop=True)  # rollingしたもの不要な部分切捨てindexをリセット
     return df_rtn
 
@@ -305,4 +305,15 @@ for c in cs:
         exec('%s.%s=%s' % (c, f, f))
 # 使い方: 区間2の移動平均線 : print(df.rolling_around(2))
 
-# if __name__ == '__main__':
+if __name__ == '__main__':
+    n = 3
+    df = pd.DataFrame(np.arange(n * 10).reshape(-1, n), columns=list('abc'))
+    window = 2
+
+    a = df.copy()
+    normal_rolling_mean = a.rolling(window).mean()
+    print('original\n', df)
+    print('normal rolling mean\n', normal_rolling_mean)
+    print('around rolling mean mirror \n', df.rolling_around(2, mirror=True))
+    print('around rolling mean NOT mirror\n',
+          df.rolling_around(2, mirror=False))  # mirror=False省略可
