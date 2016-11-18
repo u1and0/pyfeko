@@ -1,4 +1,14 @@
+# pyfeko.py v1.1.2
 FEKOの計算結果を可視化、サポートするツール群
+
+## UPDATE NOTE
+
+### UPDATE1.1.2
+
+* contour図において、カラーマップ外の色を設定
+> `plt.contourf(x, y, Z, interval, alpha=alpha, cmap=cmap, extend=extend)`
+* cmapは関数の引数から外れた
+
 
 ## w2db
 `w2db(x)`
@@ -12,20 +22,25 @@ dB -> mW
 
 ```python
 # TEST
-df = pd.DataFrame(np.arange(3 * 10).reshape(-1, 3), columns=list('abc'))
-print(df.db2w())
+se = pd.Series(np.arange(10))
+db = se.w2db()
+df = pd.DataFrame({'dBm': db,
+                   'watt': db.db2w()})
+print(df)
 
-            a           b           c
-0    1.000000    1.258925    1.584893
-1    1.995262    2.511886    3.162278
-2    3.981072    5.011872    6.309573
-3    7.943282   10.000000   12.589254
-4   15.848932   19.952623   25.118864
-5   31.622777   39.810717   50.118723
-6   63.095734   79.432823  100.000000
-7  125.892541  158.489319  199.526231
-8  251.188643  316.227766  398.107171
-9  501.187234  630.957344  794.328235
+RuntimeWarning: divide by zero encountered in log10
+  return 10 * np.log10(x)
+        dBm  watt
+0      -inf   0.0
+1  0.000000   1.0
+2  3.010300   2.0
+3  4.771213   3.0
+4  6.020600   4.0
+5  6.989700   5.0
+6  7.781513   6.0
+7  8.450980   7.0
+8  9.030900   8.0
+9  9.542425   9.0
 ```
 
 `np.power(10, x / 10)`
@@ -78,7 +93,7 @@ dB -> V
 * 戻り値:
     * df: 列名が'THETA', 'PHI', 'ET_COMP', 'EP_COMP', 'RCS_dBsm'(pandas.DataFrame型)
 
-## sumdf:
+## sumdf
 `sumdf(column_name, dataframes: list)`
 
 * 引数にしたデータフレームの特定のカラムを
@@ -139,9 +154,10 @@ dB -> V
 
 ```python
 plot_contourf(df, title='', xti=30, yti=1, alpha=.75,
-              xlabel='azimuth(deg)', ylabel='elevation(deg)', zlabel='(dBsm)',
-              cmap='jet', cmaphigh=20, cmaplow=0, cmaplevel=100, cmapstep=2,
-              fn="Times New Roman", fnsize=12, *args, **kwargs)
+                  xlabel='azimuth(deg)', ylabel='elevation(deg)', zlabel='(dBsm)',
+                  cmapout='w', cmaphigh=20, cmaplow=0, cmaplevel=100, cmapstep=2, extend='min',
+                  fn="Times New Roman", fnsize=12,
+                  *args, **kwargs)
 ```
 
 * pivotされたデータフレームを引数にcontourfを描く
@@ -152,9 +168,10 @@ plot_contourf(df, title='', xti=30, yti=1, alpha=.75,
     * xti, yti: tickの区切り(<n>degごとに分割する)
     * alpha: ヒートマップの透過率
     * xlabel, ylabel, zlabel: ラベル名
-    * cmap: カラーマップ
+    * cmapout: カラーマップ外の値の色
     * cmaphigh, cmaplow, cmaplebel: カラーマップの最大値、最小値、段階
     * cmapstep: 右側に表示されるカラーマップの区切りをいくつごとにするか
+    * extend: カラーマップ外の値の色の処理　['neither' | 'both' | 'min' | 'max']
     * fn, fnsize: フォント、フォントサイズ
 * 戻り値: なし
 
@@ -201,5 +218,5 @@ print('original\n', df)
 print('normal rolling mean\n', normal_rolling_mean)
 print('around rolling mean mirror \n', df.rolling_around(2, mirror=True))
 print('around rolling mean NOT mirror\n',
-    df.rolling_around(2, mirror=False))  # mirror=False省略化
+    df.rolling_around(2, mirror=False))  # mirror=False省略可
 ```
