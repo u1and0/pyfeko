@@ -1,9 +1,11 @@
 """
+# pyfeko.py v1.1.1
 FEKOの計算結果を可視化、サポートするツール群
 """
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib.cm as cm
 
 
 def w2db(x):
@@ -18,8 +20,11 @@ def db2w(x):
 
     ```python
     # TEST
-    df = pd.DataFrame(np.arange(3 * 10).reshape(-1, 3), columns=list('abc'))
-    print(df.db2w())
+    se = pd.Series(np.arange(10))
+    db = se.w2db()
+    df = pd.DataFrame({'dBm': db,
+                       'watt': db.db2w()})
+    print(df)
     ```
     """
     return np.power(10, x / 10)
@@ -188,7 +193,7 @@ def fine_ticks(tick, deg):
 
 def plot_contourf(df, title='', xti=30, yti=1, alpha=.75,
                   xlabel='azimuth(deg)', ylabel='elevation(deg)', zlabel='(dBsm)',
-                  cmap='jet', cmaphigh=20, cmaplow=0, cmaplevel=100, cmapstep=2,
+                  cmapout='w', cmaphigh=20, cmaplow=0, cmaplevel=100, cmapstep=2,
                   fn="Times New Roman", fnsize=12,
                   *args, **kwargs):
     """
@@ -212,7 +217,9 @@ def plot_contourf(df, title='', xti=30, yti=1, alpha=.75,
     Z = df.values
     x, y = np.meshgrid(X, Y)
     interval = np.linspace(cmaplow, cmaphigh, cmaplevel)  # cmapの段階
-    plt.contourf(x, y, Z, interval, alpha=alpha, cmap=cmap)
+    cmap = cm.jet
+    cmap.set_under(cmapout, alpha=alpha)  # cmap外の値の色設定
+    plt.contourf(x, y, Z, interval, alpha=alpha, cmap=cmap, extend="min")
     plt.axis([x.min(), x.max(), y.min(), y.max()])
     plt.xticks(fine_ticks(x, xti))  # 30degごと
     plt.yticks(fine_ticks(y, yti))  # 1degごと
@@ -221,6 +228,7 @@ def plot_contourf(df, title='', xti=30, yti=1, alpha=.75,
     plt.title(title, fontsize=fnsize, fontname=fn)
     plt.xlabel(xlabel, fontsize=fnsize, fontname=fn)
     plt.ylabel(ylabel, fontsize=fnsize, fontname=fn)
+    plt.grid()
 
 
 def rolling_around(df, window, mirror=False, min_periods=None, freq=None, center=False,
@@ -262,7 +270,7 @@ def rolling_around(df, window, mirror=False, min_periods=None, freq=None, center
     print('normal rolling mean\n', normal_rolling_mean)
     print('around rolling mean mirror \n', df.rolling_around(2, mirror=True))
     print('around rolling mean NOT mirror\n',
-        df.rolling_around(2, mirror=False))  # mirror=False省略化
+        df.rolling_around(2, mirror=False))  # mirror=False省略可
     ```
     """
     df_append = df.sort_index(ascending=False) if mirror else df  # mirror=Trueであれば"降順並べ替え"
