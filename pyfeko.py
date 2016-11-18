@@ -1,4 +1,5 @@
 """
+# pyfeko.py v1.1.1
 FEKOの計算結果を可視化、サポートするツール群
 """
 import numpy as np
@@ -18,8 +19,11 @@ def db2w(x):
 
     ```python
     # TEST
-    df = pd.DataFrame(np.arange(3 * 10).reshape(-1, 3), columns=list('abc'))
-    print(df.db2w())
+    se = pd.Series(np.arange(10))
+    db = se.w2db()
+    df = pd.DataFrame({'dBm': db,
+                       'watt': db.db2w()})
+    print(df)
     ```
     """
     return np.power(10, x / 10)
@@ -262,7 +266,7 @@ def rolling_around(df, window, mirror=False, min_periods=None, freq=None, center
     print('normal rolling mean\n', normal_rolling_mean)
     print('around rolling mean mirror \n', df.rolling_around(2, mirror=True))
     print('around rolling mean NOT mirror\n',
-        df.rolling_around(2, mirror=False))  # mirror=False省略化
+        df.rolling_around(2, mirror=False))  # mirror=False省略可
     ```
     """
     df_append = df.sort_index(ascending=False) if mirror else df  # mirror=Trueであれば"降順並べ替え"
@@ -288,10 +292,4 @@ for c in cs:
         exec('%s.%s=%s' % (c, f, f))
 # 使い方: 区間2の移動平均線 : print(df.rolling_around(2))
 
-if __name__ == '__main__':
-    n = 2
-    se = pd.Series(np.arange(10))
-    db = se.w2db()
-    df = pd.DataFrame({'dBm': db,
-                       'watt': db.db2w()})
-    print(df)
+# if __name__ == '__main__':
