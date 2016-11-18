@@ -1,6 +1,15 @@
 # pyfeko.py v1.1.2
 FEKOの計算結果を可視化、サポートするツール群
 
+## UPDATE NOTE
+
+### UPDATE1.1.2
+
+* contour図において、カラーマップ外の色を設定
+> `plt.contourf(x, y, Z, interval, alpha=alpha, cmap=cmap, extend=extend)`
+* cmapは関数の引数から外れた
+
+
 ## w2db
 `w2db(x)`
 mW -> dB
