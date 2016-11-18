@@ -1,10 +1,19 @@
 """
-# pyfeko.py v1.1.1
+# pyfeko.py v1.1.2
 FEKOの計算結果を可視化、サポートするツール群
+
+## UPDATE NOTE
+
+### UPDATE1.1.2
+
+* contour図において、カラーマップ外の色を設定
+> `plt.contourf(x, y, Z, interval, alpha=alpha, cmap=cmap, extend="min")`
+* cmapは関数の引数から外れた
 """
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib.cm as cm
 
 
 def w2db(x):
@@ -192,7 +201,7 @@ def fine_ticks(tick, deg):
 
 def plot_contourf(df, title='', xti=30, yti=1, alpha=.75,
                   xlabel='azimuth(deg)', ylabel='elevation(deg)', zlabel='(dBsm)',
-                  cmap='jet', cmaphigh=20, cmaplow=0, cmaplevel=100, cmapstep=2,
+                  cmapout='w', cmaphigh=20, cmaplow=0, cmaplevel=100, cmapstep=2, extend='min',
                   fn="Times New Roman", fnsize=12,
                   *args, **kwargs):
     """
@@ -205,9 +214,10 @@ def plot_contourf(df, title='', xti=30, yti=1, alpha=.75,
         * xti, yti: tickの区切り(<n>degごとに分割する)
         * alpha: ヒートマップの透過率
         * xlabel, ylabel, zlabel: ラベル名
-        * cmap: カラーマップ
+        * cmapout: カラーマップ外の値の色
         * cmaphigh, cmaplow, cmaplebel: カラーマップの最大値、最小値、段階
         * cmapstep: 右側に表示されるカラーマップの区切りをいくつごとにするか
+        * extend: カラーマップ外の値の色の処理　['neither' | 'both' | 'min' | 'max']
         * fn, fnsize: フォント、フォントサイズ
     * 戻り値: なし
     """
@@ -216,7 +226,9 @@ def plot_contourf(df, title='', xti=30, yti=1, alpha=.75,
     Z = df.values
     x, y = np.meshgrid(X, Y)
     interval = np.linspace(cmaplow, cmaphigh, cmaplevel)  # cmapの段階
-    plt.contourf(x, y, Z, interval, alpha=alpha, cmap=cmap)
+    cmap = cm.jet
+    cmap.set_under(cmapout, alpha=alpha)  # cmap外の値の色設定
+    plt.contourf(x, y, Z, interval, alpha=alpha, cmap=cmap, extend=extend)
     plt.axis([x.min(), x.max(), y.min(), y.max()])
     plt.xticks(fine_ticks(x, xti))  # 30degごと
     plt.yticks(fine_ticks(y, yti))  # 1degごと
@@ -225,6 +237,7 @@ def plot_contourf(df, title='', xti=30, yti=1, alpha=.75,
     plt.title(title, fontsize=fnsize, fontname=fn)
     plt.xlabel(xlabel, fontsize=fnsize, fontname=fn)
     plt.ylabel(ylabel, fontsize=fnsize, fontname=fn)
+    plt.grid()
 
 
 def rolling_around(df, window, mirror=False, min_periods=None, freq=None, center=False,
