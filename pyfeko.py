@@ -288,4 +288,10 @@ for c in cs:
         exec('%s.%s=%s' % (c, f, f))
 # 使い方: 区間2の移動平均線 : print(df.rolling_around(2))
 
-# if __name__ == '__main__':
+if __name__ == '__main__':
+    n = 2
+    se = pd.Series(np.arange(10))
+    db = se.w2db()
+    df = pd.DataFrame({'dBm': db,
+                       'watt': db.db2w()})
+    print(df)
