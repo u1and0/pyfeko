@@ -240,7 +240,7 @@ def plot_contourf(df, title='', xti=30, yti=1, alpha=.75,
     plt.grid()
 
 
-def rolling_around(df, window, mirror=False, min_periods=None, freq=None, center=False,
+def rolling_around(df, window, mirror=False, min_periods=None, freq=None, center=True,
                    win_type=None, on=None, axis=0, *args, **kwargs):
     """
     * **全周移動平均の作成**
