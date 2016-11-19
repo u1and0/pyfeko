@@ -240,7 +240,7 @@ def plot_contourf(df, title='', xti=30, yti=1, alpha=.75,
     plt.grid()
 
 
-def rolling_around(self, window, mirror=False, min_periods=None, freq=None, center=False,
+def rolling_around(df, window, mirror=False, min_periods=None, freq=None, center=False,
                    win_type=None, on=None, axis=0, *args, **kwargs):
     """
     * **全周移動平均の作成**
@@ -283,7 +283,7 @@ def rolling_around(self, window, mirror=False, min_periods=None, freq=None, cent
     ```
     """
     df_append = df.sort_index(ascending=False) if mirror else df  # mirror=Trueであれば"降順並べ替え"
-    df_roll = pd.concat(df_append, df, df_append, ignore_index=True)  # データをつなげる
+    df_roll = pd.concat([df_append, df, df_append], ignore_index=True)  # データをつなげる
     # mirror=Trueなら鏡像データ
     # mirror=Falseなら同じデータがつながる
     f = df_roll.rolling(window, min_periods=min_periods,
