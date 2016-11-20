@@ -290,7 +290,7 @@ def rolling_around(df, window, mirror=False, min_periods=None, freq=None, center
                         freq=freq, center=center,
                         win_type=win_type, on=on, axis=axis)
     df_rmean = f.mean()  # 移動平均
-    df_rtn = df_rmean.loc[len(df_rmean) / 3:len(df_rmean) * 2 / 3]\
+    df_rtn = df_rmean.loc[len(df_rmean) / 3:len(df_rmean) * 2 / 3 - 1]\
         .reset_index(drop=True)  # rollingしたもの不要な部分切捨てindexをリセット
     return df_rtn
 
