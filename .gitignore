@@ -1,3 +1,8 @@
 *.png
 *.ipynb
 *.out
+SampleCode.*
+!SampleCode.ipynb
+!SampleCode.html
+!SampleCode.md
+!SampleCode.py
