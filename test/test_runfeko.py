@@ -1,11 +1,12 @@
 #!/bin/env python3
 import sys
 sys.path.append('./bin/')
-from runfeko import *
+import runfeko
 
-# =================_select_files==================
-print('-------------------')
-task = Runfeko()
-print('files\n', task.files)
-print('-------------------')
-print('command\n', task._generate(task.files[0]))
+task = runfeko.Runfeko()
+print('====_select_files====')
+print(task.files)
+print('====command generate 1====')
+print(task._generate(task.files[0]))
+print('====command generate all====')
+print(task._command_list_gen(task.files))

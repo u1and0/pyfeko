@@ -32,17 +32,15 @@ class Runfeko:
         self.files = _select_files(Runfeko.FILETYPES, Runfeko.ROOT)
         self.commands = []
 
-    def _main(self):
-        for file in self.files:
-            next_command = self._generate(file)
-            self.commands.append(next_command)  # コマンドをリストに格納
-        self._execute()
-        self._mail()
+    def _command_list_gen(self, files):
+        """実行コマンド生成(self._generate())をすべてのファイルに適用したlist(words) of list(tasks)を返す"""
+        command_list = map(self._generate, files)
+        return list(command_list)
 
     def _generate(self, file):
-        """実行コマンドのリストを返す
-        args: files: ファイルのリスト
-        return: li: コマンドのリスト
+        """実行コマンドを返す
+        args:  filename
+        return: one command
         """
         command = Runfeko.COMMAND.copy()  # コマンドの初期化
         command.insert(1, file)  # コマンドにファイル名挿入
@@ -53,3 +51,8 @@ class Runfeko:
 
     def _mail(self):
         pass
+
+    def _main(self):
+        coml = self._command_list_gen(self.files)
+        self._execute(coml)
+        self.mail()
