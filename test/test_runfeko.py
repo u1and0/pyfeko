@@ -1,5 +1,5 @@
 #!/bin/env python3
-import sys
+import sys, os
 sys.path.append('./bin/')
 import runfeko
 
@@ -10,3 +10,5 @@ print('====command generate 1====')
 print(task._generate(task.files[0]))
 print('====command generate all====')
 print(task._command_list_gen(task.files))
+print('====send mail====')
+print(task._mail('./ini/file.log'))

@@ -1,4 +1,4 @@
-#!/bin/env python3
+#!/bin/env python
 """FEKOの逐次実行スケジューラ
 # USAGE
 ## @Windows env
@@ -15,6 +15,11 @@ $ ,/runfeko
 """
 from tkinter import filedialog
 import os
+import smtplib
+from email.mime.text import MIMEText
+import datetime
+import codecs
+import simplejson
 
 
 def _select_files(filetypes, initialdir):
@@ -46,11 +51,46 @@ class Runfeko:
         command.insert(1, file)  # コマンドにファイル名挿入
         return command
 
-    def _execute(self):
-        pass
+    def _execute(self, commands):
+        print(commands)
 
-    def _mail(self):
-        pass
+    def _mail(self, logfile):
+        """Send mail to many address
+        from designated address
+        """
+        # file.txt中に送信したい内容が入っている
+        # with codecs.open('file.txt', 'r', 'utf-8') as f:
+        with open(logfile) as f:
+            raw_msg = f.read()
+            jp = 'iso-2022-jp'
+            msg = MIMEText(raw_msg.encode(jp), 'plain', jp)
+
+        # MAIL SETTING
+        with open('./ini/mail_setting.json', 'r') as jsonfile:
+            param = simplejson.load(jsonfile)
+        to_address = param['to_address']
+        from_address = param['from_address']
+        password = param['password']
+
+        # Subject指定の時に使う
+        date = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+
+        msg['Subject'] = date + " の使用情報"
+        msg['From'] = from_address
+        # smtpサーバーへの接続
+        smtp = smtplib.SMTP("smtp.gmail.com", 587)
+        smtp.ehlo()
+        smtp.starttls()
+        smtp.ehlo()
+        smtp.login(from_address, password)
+        for to_add in to_address:
+            msg['To'] = to_add
+            print(msg)
+            smtp.send_message(msg)
+            print("Successfully sent email to {}\n".format(to_add))
+            msg['To'] = None
+        else:
+            smtp.close()
 
     def _main(self):
         coml = self._command_list_gen(self.files)
