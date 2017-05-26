@@ -2,58 +2,71 @@
 import smtplib
 from email.mime.text import MIMEText
 import simplejson
-import codecs
+import os
 
 
-def send_mail(setting, subject, body):
+class gmail:
     """Send gmail
-        to few address
-        from designated address
+    複数の宛先にgmailを送信する。
+    送信先/元、パスワードはJSON形式で記述し、 引数にファイルパスを入れる。
 
-    Usage: `send_mail(setting='../ini/mail_setting.json', body='../ini/file.log')`
-
-    # setting: 送信先/元、パスワード設定
-    '../ini/mail_setting.json': JSON形式で記述
-
-        * 送信先アドレス(例:"to_address": ["foo@gmail.com", "bar@hotmail.co.jp"])
-        * 送信元アドレス(例: "from_address": "foobar@gmail.com")
-        * 送信元アドレスのパスワード(例: "password": "12345678")
-
-    ## 送信先アドレスはリスト形式で複数記述可能
-    参考: https://stackoverflow.com/questions/8856117/how-to-send-email-to-multiple-recipients-using-python-smtplib
-
-    ## 送信元アドレスは以下の操作が必要
-
-    * 2段階プロセス->オフ
-    * 安全性の低いアプリのアクセス->許可
-
-    参考: http://qiita.com/HirofumiYashima/items/1b24397c2e915658c984
+    Usage:
+        hoge = gmail('./ini/mail.setting')
+        hoge.send('タイトル', '本文か本文が入ったファイルパス')
     """
 
-    # ---------Get mail setting----------
-    with open(setting, 'r') as jsonfile:  # 宛先、差出人、差出人パスワード
-        param = simplejson.load(jsonfile)
-    to_address = param['to_address']
-    from_address = param['from_address']
-    password = param['password']
+    HOST, PORT = "smtp.gmail.com", 587
 
-    # ---------Set mail body, subject from, to----------
-    with codecs.open(body, 'r', 'utf-8') as f:
-        # with open(body, 'r') as f:  # メールの本文
-        raw_msg = f.read()
-    jp = 'iso-2022-jp'
-    message = MIMEText(raw_msg.encode(jp), 'plain', jp)
-    message['Subject'] = subject
-    message['From'] = from_address
-    message['To'] = ", ".join(to_address)
+    def __init__(self, setting_file):
+        """
+        `setting_file` はJSON形式で記述
+        送信先、送信元、パスワードを以下のように記述
 
-    # ---------Connect smtp server----------
-    smtp = smtplib.SMTP("smtp.gmail.com", 587)
-    smtp.ehlo()
-    smtp.starttls()
-    smtp.ehlo()
-    smtp.login(from_address, password)
-    smtp.send_message(message)
-    smtp.close()
+        ```JSON:setting_file
+            {
+                "to_address": ["example1@gmail.com", "example2@hotmail.co.jp"],
+                "from_address": "source@gmail.com",
+                "password": "12345678"
+            }
+        ```
 
-    return message
+        送信元アドレスは以下の操作が必要
+            * 2段階プロセス->オフ
+            * 安全性の低いアプリのアクセス->許可
+            > 参考: http://qiita.com/HirofumiYashima/items/1b24397c2e915658c984
+
+        """
+        with open(setting_file, 'r') as jsonfile:  # 宛先、差出人、差出人パスワード
+            param = simplejson.load(jsonfile)
+        self.to_address = param['to_address']
+        self.from_address = param['from_address']
+        self.password = param['password']
+
+    def _write(self, subject, body):
+        """Set mail subject from, to"""
+        if os.path.isfile(body):  # bodyがファイルとして渡された場合
+            with open(body, 'r') as f:  # メールの本文
+                raw_msg = f.read()
+        else:  # bodyがファイルでない場合
+            raw_msg = body
+        jp = 'iso-2022-jp'
+        message = MIMEText(raw_msg.encode(jp), 'plain', jp)
+        message['Subject'] = subject
+        message['From'] = self.from_address
+        message['To'] = ", ".join(self.to_address)
+        return message
+
+    def send(self, subject, body):
+        """Connect smtp server
+        Usage:
+            gmail.send('title', 'some messege or file path')
+        """
+        smtp = smtplib.SMTP(self.HOST, self.PORT)
+        smtp.ehlo()
+        smtp.starttls()
+        smtp.ehlo()
+        smtp.login(self.from_address, self.password)
+        mail_message = self._write(subject, body)
+        smtp.send_message(mail_message)
+        smtp.close()
+        return mail_message
