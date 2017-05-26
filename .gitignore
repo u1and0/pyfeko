@@ -2,8 +2,5 @@
 *.png
 *.ipynb
 *.out
-SampleCode.*
-!SampleCode.ipynb
-!SampleCode.html
-!SampleCode.md
-!SampleCode.py
+/note/SampleCode/
+/ini/mail_setting.json
