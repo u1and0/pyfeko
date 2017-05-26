@@ -1,18 +1,18 @@
 """Gmail送信"""
 import smtplib
 from email.mime.text import MIMEText
-import datetime
 import simplejson
+import codecs
 
 
-def send_mail(mail_setting_file, send_file):
+def send_mail(setting, subject, body):
     """Send gmail
         to few address
         from designated address
 
-    Usage: `send_mail(mail_setting_file='../ini/mail_setting.json', send_file='../ini/file.log')`
+    Usage: `send_mail(setting='../ini/mail_setting.json', body='../ini/file.log')`
 
-    # mail_setting_file: 送信先/元、パスワード設定
+    # setting: 送信先/元、パスワード設定
     '../ini/mail_setting.json': JSON形式で記述
 
         * 送信先アドレス(例:"to_address": ["foo@gmail.com", "bar@hotmail.co.jp"])
@@ -29,38 +29,31 @@ def send_mail(mail_setting_file, send_file):
 
     参考: http://qiita.com/HirofumiYashima/items/1b24397c2e915658c984
     """
-    # file.txt中に送信したい内容が入っている
-    # with codecs.open('file.txt', 'r', 'utf-8') as f:
-    with open(send_file) as f:
-        raw_msg = f.read()
-        jp = 'iso-2022-jp'
-        msg = MIMEText(raw_msg.encode(jp), 'plain', jp)
 
-    # MAIL SETTING
-    with open(mail_setting_file, 'r') as jsonfile:
+    # ---------Get mail setting----------
+    with open(setting, 'r') as jsonfile:  # 宛先、差出人、差出人パスワード
         param = simplejson.load(jsonfile)
     to_address = param['to_address']
     from_address = param['from_address']
     password = param['password']
 
-    # Subject指定の時に使う
-    date = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+    # ---------Set mail body, subject from, to----------
+    with codecs.open(body, 'r', 'utf-8') as f:
+        # with open(body, 'r') as f:  # メールの本文
+        raw_msg = f.read()
+    jp = 'iso-2022-jp'
+    message = MIMEText(raw_msg.encode(jp), 'plain', jp)
+    message['Subject'] = subject
+    message['From'] = from_address
+    message['To'] = ", ".join(to_address)
 
-    msg['Subject'] = date + " の使用情報"
-    msg['From'] = from_address
-    msg['To'] = ", ".join(to_address)
-
-    # smtpサーバーへの接続
+    # ---------Connect smtp server----------
     smtp = smtplib.SMTP("smtp.gmail.com", 587)
     smtp.ehlo()
     smtp.starttls()
     smtp.ehlo()
     smtp.login(from_address, password)
-    smtp.send_message(msg)
+    smtp.send_message(message)
     smtp.close()
-    return msg
 
-
-if __name__ == '__main__':
-    message = send_mail(mail_setting_file='../ini/mail_setting.json', send_file='../ini/file.log')
-    print("Successfully sent email to {}\n".format(message['To']))
+    return message
