@@ -10,6 +10,12 @@
     * logファイルの中身を送信する
     > 受信用アドレスは後付できるようにする
     > インターフェースとして送受信アドレスを引数にするクラスを作成
+* Execute in background
+    shell scriptを書き込むpython scriptにする
+    shell scriptはバックグラウンドで実行&
+    とするか
+    > /dev/nullとしてアウトプットを消すか
+
 
 
 ## USAGE

@@ -5,7 +5,7 @@ import simplejson
 import os
 
 
-class gmail:
+class Gmail:
     """Send gmail
     複数の宛先にgmailを送信する。
     送信先/元、パスワードはJSON形式で記述し、 引数にファイルパスを入れる。

@@ -15,6 +15,7 @@ $ ,/runfeko
 """
 from tkinter import filedialog
 import os
+from mail import Gmail
 
 
 def _select_files(filetypes, initialdir):
@@ -29,8 +30,9 @@ class Runfeko:
     COMMAND = ['runfeko', '-np', '16']  # runfekoの実行, -np 16: 16コアの使用
 
     def __init__(self):
-        self.files = _select_files(Runfeko.FILETYPES, Runfeko.ROOT)
+        self.files = _select_files(self.FILETYPES, self.ROOT)
         self.commands = []
+        self.mailing_list = Gmail('./ini/mail_setting.json')
 
     def _command_list_gen(self, files):
         """実行コマンド生成(self._generate())をすべてのファイルに適用したlist(words) of list(tasks)を返す"""
@@ -47,10 +49,10 @@ class Runfeko:
         return command
 
     def _execute(self, commands):
-        print(commands)
-
+        send_mail = self.mailing_list.send('Runfekoテスト', command)
+        return send_mail
 
     def _main(self):
-        coml = self._command_list_gen(self.files)
-        self._execute(coml)
-        self.mail()
+        file_list = self._command_list_gen(self.files)
+        execute_command = self._execute(file_list)
+        return execute_command
