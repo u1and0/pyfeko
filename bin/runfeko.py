@@ -20,11 +20,6 @@ import subprocess as sp
 import sys
 
 
-def _select_files(filetypes, initialdir):
-    filenames = filedialog.askopenfilenames(filetypes=filetypes, initialdir=initialdir)
-    return filenames
-
-
 class Runfeko:
     """FEKO実行のスケジューラ
     1. preファイルの選択
@@ -36,10 +31,15 @@ class Runfeko:
     ROOT = os.getcwd()
     COMMAND = ['runfeko', '-np', '16']  # runfekoの実行, -np 16: 16コアの使用
 
-    def __init__(self):
-        self.files = _select_files(self.FILETYPES, self.ROOT)
+    def __init__(self, mail_setting='./ini/mail_setting.json'):
+        self.files = self._select_files(self.FILETYPES, self.ROOT)
         self.commands = self._command_list_gen(self.files)
-        self.mailing_list = Gmail('./ini/mail_setting.json')
+        self.mailing_list = Gmail(mail_setting)
+
+    def _select_files(self, filetypes, initialdir):
+        """ファイルの選択"""
+        filenames = filedialog.askopenfilenames(filetypes=filetypes, initialdir=initialdir)
+        return filenames
 
     def _command_list_gen(self, files):
         """実行コマンド生成(self._generate())をすべてのファイルに適用したlist(words) of list(tasks)を返す"""
@@ -60,7 +60,7 @@ class Runfeko:
         return run
 
     def _main(self):
-        command=self.commands
         # result = self._execute(command[0])
-        send_mail = self.mailing_list.send('Runfekoテスト', str(command))
-        return send_mail
+        body = str(self.commands)
+        self.mailing_list.send('Runfekoテスト', body)
+        return body
