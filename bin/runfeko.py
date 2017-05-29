@@ -32,12 +32,13 @@ class Runfeko:
     3. メールの送信(logファイル、エラー出力)
     """
     FILETYPES = [('テキストファイルとExcelファイル', '*.txt;*.csv')]
+    # FILETYPES = [('PREFEKO files', '*.pre;*.inc')]
     ROOT = os.getcwd()
     COMMAND = ['runfeko', '-np', '16']  # runfekoの実行, -np 16: 16コアの使用
 
     def __init__(self):
         self.files = _select_files(self.FILETYPES, self.ROOT)
-        self.commands = _command_list_gen(self.files)
+        self.commands = self._command_list_gen(self.files)
         self.mailing_list = Gmail('./ini/mail_setting.json')
 
     def _command_list_gen(self, files):
@@ -60,5 +61,6 @@ class Runfeko:
 
     def _main(self):
         command=self.commands
+        # result = self._execute(command[0])
         send_mail = self.mailing_list.send('Runfekoテスト', str(command))
         return send_mail
