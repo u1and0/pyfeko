@@ -26,7 +26,7 @@ def _execute(command_dic):
     cwd: 選択したファイル名のディレクトリ
     """
     # command_dic.insert(0, sys.executable)  # 'C:\\tools\\Anaconda3\\python.exe'がコマンドリストに追加される
-    print('\n===Execute===\n{}\n\n'.formant(command_dic['command']))
+    print('\n===Execute===\n{}\n\n'.format(command_dic['command']))
     run = sp.call(command_dic['command'],
                   creationflags=sp.CREATE_NEW_CONSOLE, cwd=command_dic['cwd'])
     return run
@@ -72,7 +72,7 @@ class Runfeko:
         self.mailing_list.send('Runfekoテスト', str(body))
         for command in body:
             result = _execute(command)
-            self.mailing_list.send('Runfekoテスト', result)
+            self.mailing_list.send('Runfekoテスト', str(result))
         return body
 
 
