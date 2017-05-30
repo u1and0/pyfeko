@@ -19,11 +19,16 @@ from mail import Gmail
 import subprocess as sp
 
 
-def _execute(commands):
-    """引数commands(リスト形式)の実行"""
-    # commands.insert(0, sys.executable)  # 'C:\\tools\\Anaconda3\\python.exe'がコマンドリストに追加される
-    print(commands)
-    run = sp.call(commands, creationflags=sp.CREATE_NEW_CONSOLE, cwd=os.path.dirname(commands[1]))
+def _execute(command_dic):
+    """command_dicの実行
+    引数command_dic(ディクショナリ形式)の実行
+    command: `['runfeko', <filename>, '-np', '16']`
+    cwd: 選択したファイル名のディレクトリ
+    """
+    # command_dic.insert(0, sys.executable)  # 'C:\\tools\\Anaconda3\\python.exe'がコマンドリストに追加される
+    print('\n===Execute===\n{}\n\n'.formant(command_dic['command']))
+    run = sp.call(command_dic['command'],
+                  creationflags=sp.CREATE_NEW_CONSOLE, cwd=command_dic['cwd'])
     return run
 
 
@@ -33,7 +38,7 @@ class Runfeko:
     2. 実行
     3. メールの送信(logファイル、エラー出力)
     """
-    FILETYPES = [('PREFEKO files', '*.pre;*.inc')]
+    FILETYPES = [('PREFEKO files', '*.pre;*.fek')]
     ROOT = os.getcwd()
     COMMAND = ['runfeko', '-np', '16']  # runfekoの実行, -np 16: 16コアの使用
 
@@ -58,8 +63,9 @@ class Runfeko:
         return: one command
         """
         command = self.COMMAND.copy()  # コマンドの初期化
-        command.insert(1, file)  # コマンドにファイル名挿入
-        return command
+        command.insert(1, os.path.basename(file))  # コマンドにファイル名挿入
+        command_dic = {'command': command, 'cwd': os.path.dirname(file)}
+        return command_dic
 
     def _main(self):
         body = self.commands
