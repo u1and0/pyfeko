@@ -33,7 +33,7 @@ class Runfeko:
     2. 実行
     3. メールの送信(logファイル、エラー出力)
     """
-    FILETYPES = [('PREFEKO files', '*')]
+    FILETYPES = [('PREFEKO files', '*.pre;*.inc')]
     ROOT = os.getcwd()
     COMMAND = ['runfeko', '-np', '16']  # runfekoの実行, -np 16: 16コアの使用
 
