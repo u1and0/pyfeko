@@ -17,7 +17,6 @@ from tkinter import filedialog
 import os
 from mail import Gmail
 import subprocess as sp
-import sys
 
 
 def _execute(commands):
@@ -36,8 +35,7 @@ class Runfeko:
     """
     FILETYPES = [('PREFEKO files', '*')]
     ROOT = os.getcwd()
-    COMMAND = ['notepad']
-    # COMMAND = ['runfeko', '-np', '16']  # runfekoの実行, -np 16: 16コアの使用
+    COMMAND = ['runfeko', '-np', '16']  # runfekoの実行, -np 16: 16コアの使用
 
     def __init__(self, mail_setting='./ini/mail_setting.json'):
         self.files = self._select_files(self.FILETYPES, self.ROOT)
