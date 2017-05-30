@@ -23,7 +23,7 @@ def _execute(commands):
     """引数commands(リスト形式)の実行"""
     # commands.insert(0, sys.executable)  # 'C:\\tools\\Anaconda3\\python.exe'がコマンドリストに追加される
     print(commands)
-    run = sp.call(commands, creationflags=sp.CREATE_NEW_CONSOLE)
+    run = sp.call(commands, creationflags=sp.CREATE_NEW_CONSOLE, cwd=os.path.dirname(commands[1]))
     return run
 
 
