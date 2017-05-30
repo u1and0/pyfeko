@@ -20,16 +20,24 @@ import subprocess as sp
 import sys
 
 
+def _execute(commands):
+    """引数commands(リスト形式)の実行"""
+    # commands.insert(0, sys.executable)  # 'C:\\tools\\Anaconda3\\python.exe'がコマンドリストに追加される
+    print(commands)
+    run = sp.call(commands, creationflags=sp.CREATE_NEW_CONSOLE)
+    return run
+
+
 class Runfeko:
     """FEKO実行のスケジューラ
     1. preファイルの選択
     2. 実行
     3. メールの送信(logファイル、エラー出力)
     """
-    FILETYPES = [('テキストファイルとExcelファイル', '*.txt;*.csv')]
-    # FILETYPES = [('PREFEKO files', '*.pre;*.inc')]
+    FILETYPES = [('PREFEKO files', '*')]
     ROOT = os.getcwd()
-    COMMAND = ['runfeko', '-np', '16']  # runfekoの実行, -np 16: 16コアの使用
+    COMMAND = ['notepad']
+    # COMMAND = ['runfeko', '-np', '16']  # runfekoの実行, -np 16: 16コアの使用
 
     def __init__(self, mail_setting='./ini/mail_setting.json'):
         self.files = self._select_files(self.FILETYPES, self.ROOT)
@@ -55,12 +63,15 @@ class Runfeko:
         command.insert(1, file)  # コマンドにファイル名挿入
         return command
 
-    def _execute(self, commands):
-        run = sp.Popen(commands, creationflags=sp.CREATE_NEW_CONSOLE)
-        return run
-
     def _main(self):
-        # result = self._execute(command[0])
-        body = str(self.commands)
-        self.mailing_list.send('Runfekoテスト', body)
+        body = self.commands
+        self.mailing_list.send('Runfekoテスト', str(body))
+        for command in body:
+            result = _execute(command)
+            self.mailing_list.send('Runfekoテスト', result)
         return body
+
+
+if __name__ == '__main__':
+    task = Runfeko()
+    task._main()

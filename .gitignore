@@ -4,3 +4,4 @@
 *.out
 /note/SampleCode/
 /ini/mail_setting.json
+/test/hoge*
