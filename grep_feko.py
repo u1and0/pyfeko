@@ -3,36 +3,17 @@ from IPython import get_ipython
 import pandas as pd
 import numpy as np
 
-# DataFrame calc
-
-
-def compabs(r, i):
-    """abusolute of real and imagine"""
-    return np.sqrt(r**2 + i**2)
-
-
-def antfactor(df, offset):
-    """caluclate antenna factor"""
-    # compabs fo real & imag
-    df['absV(V)'] = compabs(df['realV(V)'], df['imagV(V)'])
-    # Antenna factor(E=100dBV)
-    df['ant100(dBuV)'] = 20 * np.log10(df['absV(V)']) + offset
-    return df
-
 
 # Get data in ipython using !grep
-def get_data(strings):
+def grep(strings):
     """ Get only element which contain 'Load1'
-
     args
         * strings: get from grep out file
     usage:
         strings = get_ipython().getoutput('rg -A3 Volt *.out ')
-        get_data(strings)
-
+        grep(strings)
             or
-
-        get_data(!rg -A3 Volt *.out)
+        grep(!rg -A3 Volt *.out)
     """
     return [i for i in strings if 'Load1' in i]
 
@@ -50,12 +31,28 @@ def element(strings):
 
 
 def elements(list_strings):
-    """com numpy array"""
+    """aggregate all element obj in numpy array"""
     return np.array([element(i) for i in list_strings])
 
 
+# DataFrame calc
+def compabs(r, i):
+    """abusolute of real and imagine"""
+    return np.sqrt(r**2 + i**2)
+
+
+def antfactor(df, offset):
+    """caluclate antenna factor"""
+    # compabs fo real & imag
+    df['absV(V)'] = compabs(df['realV(V)'], df['imagV(V)'])
+    # Antenna factor(E=100dBV)
+    df['ant100(dBuV)'] = 20 * np.log10(df['absV(V)']) + offset
+    return df
+
+
 def elem_to_df(array_strings):
-    index = array_strings[:, 0]
+    """aggregate pandas DataFrame"""
+    index = [i[:-5] for i in array_strings[:, 0]]
     columns = [
         'realV(V)', 'imagV(V)', 'realI(A)', 'imagI(A)', 'realZ(Ohm)',
         'imagZ(Ohm)', 'P(W)'
@@ -66,9 +63,13 @@ def elem_to_df(array_strings):
     return df
 
 
-if __name__ == '__main__':
-    grep = get_ipython().getoutput('rg -A3 Volt *.out')
-    list_strings = get_data(grep)
+def main():
+    strings = get_ipython().getoutput('rg -A3 Volt *.out')
+    list_strings = grep(strings)
     grep_array = elements(list_strings)
     df = elem_to_df(grep_array)
-    df.to_csv('test_file.csv')
+    return df
+
+
+if __name__ == '__main__':
+    main().to_csv('grep_feko.csv')
