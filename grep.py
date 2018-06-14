@@ -5,7 +5,7 @@ import numpy as np
 
 
 # Get data in ipython using !grep
-def grep(strings):
+def grep(*pattern):
     """ Get only element which contain 'Load1'
     args
         * strings: get from grep out file
@@ -13,9 +13,12 @@ def grep(strings):
         strings = get_ipython().getoutput('rg -A3 Volt *.out ')
         grep(strings)
             or
-        grep(!rg -A3 Volt *.out)
+        grep('-A3', 'Volt' '*.out')
     """
-    return [i for i in strings if 'Load1' in i]
+    joined_str = 'rg ' + ' '.join(pattern)
+    grep_str = get_ipython().getoutput(joined_str)
+    split_str = [w.split() for w in grep_str]
+    return split_str
 
 
 # Delete unnessesary data in strings
