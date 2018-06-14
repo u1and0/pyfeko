@@ -4,24 +4,49 @@ import pandas as pd
 import numpy as np
 
 
+class FekoOut():
+    def __init__(self):
+        pass
+
+    def frequency(self):
+        pattern = ['Freq', '*.out']
+        greped = grep(*pattern)
+        freq_list = split_list_stings(greped, 'FREQ =')
+        return freq_list
+
+    def load(self):
+        pass
+
+    def theta(self):
+        pass
+
+
 # Get data in ipython using !grep
+
+
 def grep(*pattern):
     """ Get only element which contain 'Load1'
-    args
-        * strings: get from grep out file
     usage:
-        strings = get_ipython().getoutput('rg -A3 Volt *.out ')
-        grep(strings)
+        pattern = ['-A3', 'Volt', '*.out']
+        grep(*pattern)
             or
         grep('-A3', 'Volt' '*.out')
     """
     joined_str = 'rg ' + ' '.join(pattern)
     grep_str = get_ipython().getoutput(joined_str)
-    split_str = [w.split() for w in grep_str]
-    return split_str
+    return grep_str
+
+
+def split_list_stings(list_strings, delim=None):
+    """stlip delim
+    default: split multi space
+    """
+    return [w.split(delim) for w in list_strings]
 
 
 # Delete unnessesary data in strings
+
+
 def element(strings):
     """list element transpote to numpy array
     * delete white space
