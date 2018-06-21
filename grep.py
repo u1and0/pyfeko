@@ -2,6 +2,7 @@
 from IPython import get_ipython
 import pandas as pd
 import numpy as np
+TOOL = 'grep'
 
 
 class FekoOut():
@@ -32,7 +33,7 @@ def grep(*pattern):
             or
         grep('-A3', 'Volt' '*.out')
     """
-    joined_str = 'rg ' + ' '.join(pattern)
+    joined_str = '{} {}'.format(TOOL, ' '.join(pattern))
     grep_str = get_ipython().getoutput(joined_str)
     return grep_str
 
