@@ -2,6 +2,7 @@
 from IPython import get_ipython
 import pandas as pd
 import numpy as np
+import sys
 TOOL = 'grep'
 
 
@@ -105,4 +106,9 @@ def main(*strings):
 
 
 if __name__ == '__main__':
-    main().to_csv('grep_feko.csv')
+    argv = sys.argv
+    # import pdb; pdb.set_trace()
+    if len(argv) > 1:
+        print(main(*argv[1:]))
+    else:
+        print(grep.__doc__)
