@@ -26,7 +26,9 @@ class FekoOut():
 
 
 def grep(*pattern):
-    """ Get only element which contain 'Load1'
+    """Global Regural Expression Print
+    search pattern in the object
+
     usage:
         pattern = ['-A3', 'Volt', '*.out']
         grep(*pattern)
@@ -70,12 +72,14 @@ def compabs(r, i):
     return np.sqrt(r**2 + i**2)
 
 
-def antfactor(df, offset):
+def antfactor(df, offset, inplace=False):
     """caluclate antenna factor"""
+    if not inplace:
+        df = df.copy()
     # compabs fo real & imag
     df['absV(V)'] = compabs(df['realV(V)'], df['imagV(V)'])
     # Antenna factor(E=100dBV)
-    df['ant100(dBuV)'] = 20 * np.log10(df['absV(V)']) + offset
+    df['ant{}(dBuV)'.format(offset)] = 20 * np.log10(df['absV(V)']) + offset
     return df
 
 
@@ -88,15 +92,15 @@ def elem_to_df(array_strings):
     ]
     data = array_strings[:, 1:].astype(float)
     df = pd.DataFrame(data=data, index=index, columns=columns)
-    df = antfactor(df, 100)
     return df
 
 
-def main():
-    strings = get_ipython().getoutput('rg -A3 Volt *.out')
-    list_strings = grep(strings)
+def main(*strings):
+    # strings = get_ipython().getoutput('rg -A3 Volt *.out')
+    list_strings = grep(*strings)
     grep_array = elements(list_strings)
     df = elem_to_df(grep_array)
+    antfactor(df, offset=100, inplace=True)
     return df
 
 
